@@ -1,6 +1,6 @@
 # Shared standards for petravanta's apps
 
-These apply to every app linked from the hub at **https://petravanta.github.io/general/**: [Fitness Coach](https://github.com/petravanta/fitness-coach), [Skating Mentor](https://github.com/petravanta/skating-mentor) and [VoiceTrainer](https://github.com/petravanta/voicetrainer).
+These apply to every app linked from the hub at **https://petravanta.github.io/general/**: [Fitness Coach](https://github.com/petravanta/fitness-coach), [Skating Mentor](https://github.com/petravanta/skating-mentor), [VoiceTrainer](https://github.com/petravanta/voicetrainer) and [Nutrition Helper](https://github.com/petravanta/nutrition-helper).
 
 ## Back link to the hub
 
@@ -29,7 +29,7 @@ Add two things to the app's HTML:
 
 ## Shared look
 
-Fitness Coach and Skating Mentor (and the hub) share one set of colors, fonts and components. The canonical copy is [`shared/theme.css`](shared/theme.css). Each app inlines it between the `Shared look` and `end shared look` comments and only overrides the `--accent`, `--accent-ink` and `--accent-soft` values after it:
+Fitness Coach, Skating Mentor and Nutrition Helper (and the hub) share one set of colors, fonts and components. The canonical copy is [`shared/theme.css`](shared/theme.css). Each app inlines it between the `Shared look` and `end shared look` comments and only overrides the `--accent`, `--accent-ink` and `--accent-soft` values after it:
 
 | App | Light accent | Dark accent |
 | --- | --- | --- |
@@ -37,6 +37,7 @@ Fitness Coach and Skating Mentor (and the hub) share one set of colors, fonts an
 | Fitness Coach | `#4f46c8` indigo | `#9d95ff` |
 | Skating Mentor | `#c2306f` pink | `#f0679f` |
 | VoiceTrainer | `#2f3c95` indigo-blue | `#9aa6ff` |
+| Nutrition Helper | `#c2410c` orange | `#fb8a4c` |
 
 VoiceTrainer has its own type and panel styles but follows the same token names for `--bg`, `--ink`, `--muted`, `--line` and `--accent`.
 
@@ -45,6 +46,8 @@ Conventions the apps already share:
 - Light and dark themes: tokens on `:root`, dark values under `@media (prefers-color-scheme: dark)` guarded by `:root:not([data-theme="light"])`, and again under `:root[data-theme="dark"]`.
 - Phone-first layout: `viewport-fit=cover`, safe-area insets on sticky headers and sheets, 16px minimum side gutter.
 - Data stays in the browser (`localStorage`), with **Export backup** / **Import backup** as JSON, and optional Google Drive sync using the `drive.file` scope and the shared OAuth client that allows `https://petravanta.github.io`.
+- Google Drive is where a user's history lives across devices: each app keeps one JSON file (`<App name> data.json`) in the user's own Drive, saved a few seconds after each change and merged with the browser copy on connect and when the app comes back into view. User data, including imports from other apps, is loaded from inside the app and never committed to a repo.
+- Merging two copies (Drive, or an imported backup): logged records carry an `id` and are combined by id, so nothing logged on either device is lost; a `deleted` list of ids carries deletions across; and settings-like objects carry an `updatedAt`, with the newer copy winning. Nutrition Helper also stamps each record with `u` (last edit time) so the newer edit of the same record wins.
 - No sign-up; each app is a static page served by GitHub Pages from its `main` branch.
 
 When you change the shared look, update `shared/theme.css` here and the inlined copy in each app together.
