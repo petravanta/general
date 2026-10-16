@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Personal growth apps</title>
 <meta name="description" content="Personal growth apps: Fitness Coach, Skating Mentor and VoiceTrainer.">
+<script>try{var t=localStorage.getItem('petravanta.theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="shared/theme.css">
@@ -26,6 +27,7 @@
 :root[data-theme="dark"] .app.voice{--app:#9aa6ff;--app-soft:#1e2447}
 
 .topbar{padding-block:14px}
+.theme-slot{margin-left:auto;display:flex}
 .hero{padding-block:36px 24px}
 .hero h1{font-family:var(--f-display);font-weight:700;font-size:clamp(26px,5vw,38px);letter-spacing:-.02em;line-height:1.1;margin:0 0 10px;text-wrap:balance}
 .hero p{color:var(--muted);max-width:52ch;font-size:16px}
@@ -55,6 +57,7 @@ footer a{color:var(--muted)}
         <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="3" y="3" width="11" height="11" rx="3" fill="var(--accent)"/><rect x="18" y="3" width="11" height="11" rx="3" fill="var(--ink)"/><rect x="3" y="18" width="11" height="11" rx="3" fill="var(--ink)"/><rect x="18" y="18" width="11" height="11" rx="3" fill="var(--accent)"/></svg>
         petravanta
       </div>
+      <span class="theme-slot" data-theme-switch></span>
     </div>
   </div>
 </header>
@@ -90,5 +93,6 @@ footer a{color:var(--muted)}
 <footer class="wrap">
   Shared standards for these apps live in <a href="https://github.com/petravanta/general">petravanta/general</a>.
 </footer>
+<script src="shared/theme-switch.js" defer></script>
 </body>
 </html>
