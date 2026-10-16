@@ -1,4 +1,4 @@
-# Shared standards for Peter's apps
+# Shared standards for petravanta's apps
 
 These apply to every app linked from the hub at **https://petravanta.github.io/general/**: [Fitness Coach](https://github.com/petravanta/fitness-coach), [Skating Mentor](https://github.com/petravanta/skating-mentor) and [VoiceTrainer](https://github.com/petravanta/voicetrainer).
 
