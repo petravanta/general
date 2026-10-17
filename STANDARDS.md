@@ -24,8 +24,58 @@ Add two things to the app's HTML:
 ## Adding a new app
 
 1. Publish it on GitHub Pages under `petravanta.github.io/<repo>/`.
-2. Add the back link above.
-3. Add a card for it to [`index.html`](index.html): copy an existing `<li class="app …">`, set its name, link, one-line description and icon, and add a `--app` / `--app-soft` accent pair (light and dark) in the `<style>` block.
+2. Add the back link (above) and the theme switch (below), and follow *Data, not code* for its content.
+3. Apply the *Protect main* ruleset: `./github/apply-ruleset.sh <repo>`.
+4. Add a card for it to [`index.html`](index.html): copy an existing `<li class="app …">`, set its name, link, one-line description and icon, and add a `--app` / `--app-soft` accent pair (light and dark) in the `<style>` block. Also add the repo to `repos` in `github/apply-ruleset.sh`.
+
+## Light and dark themes
+
+Every app supports a light and a dark theme. By default it follows the device setting, and the **theme switch** next to the app's header lets people pick *Match system*, *Light* or *Dark*. The choice is saved once for all apps on petravanta.github.io.
+
+Add two things to the app's HTML:
+
+```html
+<!-- in <head>, before any CSS, so the saved choice applies before the first paint -->
+<script>try{var t=localStorage.getItem('petravanta.theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}</script>
+
+<!-- just before </body>, after hub-link.js -->
+<script src="https://petravanta.github.io/general/shared/theme-switch.js" defer></script>
+```
+
+- [`shared/theme-switch.js`](shared/theme-switch.js) adds a small round button at the end of the row that holds the hub link. To place it somewhere else, add an empty `<span data-theme-switch></span>` where it should go.
+- It sets `data-theme="light"` or `data-theme="dark"` on `<html>` (or removes it for *Match system*), and keeps `<meta name="theme-color">` in step.
+- For this to work, the app's colors must be tokens on `:root`, with dark values under `@media (prefers-color-scheme: dark)` guarded by `:root:not([data-theme="light"])`, and again under `:root[data-theme="dark"]`. Anything drawn in JavaScript (canvas, SVG) should read the tokens and redraw when `data-theme` changes.
+
+## Data, not code, for what an app knows
+
+Content that people might want to review or add to (exercises, sports, equipment, skills, drills) lives in JSON files under `data/` in each app, not as literals in the code. That keeps every extension point easy to see, and lets anyone add an entry with a pull request.
+
+- One file per dataset, `data/<dataset>.json`: an array of objects, one per entry, with readable field names. The order in the file is the order the app shows.
+- Every entry has a stable `id` (lowercase letters, digits and hyphens). Saved user data refers to these ids, so an id is never renamed or reused once it has shipped.
+- Each dataset has a JSON Schema, `data/schema/<dataset>.schema.json`, with a `description` on every field, enums for closed sets, and `additionalProperties: false`.
+- The app loads the files with `fetch()` at startup and maps them onto whatever internal shape the code uses. User data (progress, logs, settings) stays separate and refers to entries by id.
+- A `Check data` GitHub Actions workflow runs on every pull request: it validates each file against its schema with `ajv-cli`, and `scripts/check-data.js` checks what a schema can't (unique ids, references that exist).
+- The README has an **Extending the app** table listing each dataset, its file, its schema and what it controls, and `CONTRIBUTING.md` walks a non-programmer through adding an entry.
+- Behavior is still code. A new kind of entry that the app has to treat differently (a new movement pattern, a new skating style) means changing the code and the schema enum together.
+
+Fitness Coach (exercises, sports, equipment) and Skating Mentor (skills) follow this. VoiceTrainer's drills and reading texts are still in its source.
+
+## Notes for coding agents
+
+Each app has an `AGENTS.md` that links back here and lists only what's specific to that app, plus a one-line `CLAUDE.md` containing `@AGENTS.md` so Claude Code reads the same notes.
+
+## Protecting `main`
+
+Every repo should have a ruleset called **Protect main** on its default branch that blocks force pushes and deleting the branch. Normal pushes and pull request merges work as before. The rule is [`github/main-branch-ruleset.json`](github/main-branch-ruleset.json).
+
+To apply it, or roll out a change to it, run this once on your own machine with the [GitHub CLI](https://cli.github.com/) signed in (`gh auth login`):
+
+```sh
+./github/apply-ruleset.sh                # the hub and every app
+./github/apply-ruleset.sh my-new-app     # just one repo
+```
+
+Or by hand: in the repo, **Settings → Rules → Rulesets → New ruleset → Import a ruleset**, and pick `github/main-branch-ruleset.json`.
 
 ## Shared look
 
@@ -42,7 +92,7 @@ VoiceTrainer has its own type and panel styles but follows the same token names 
 
 Conventions the apps already share:
 
-- Light and dark themes: tokens on `:root`, dark values under `@media (prefers-color-scheme: dark)` guarded by `:root:not([data-theme="light"])`, and again under `:root[data-theme="dark"]`.
+- Light and dark themes with the shared theme switch (see *Light and dark themes* above).
 - Phone-first layout: `viewport-fit=cover`, safe-area insets on sticky headers and sheets, 16px minimum side gutter.
 - Data stays in the browser (`localStorage`), with **Export backup** / **Import backup** as JSON, and optional Google Drive sync using the `drive.file` scope and the shared OAuth client that allows `https://petravanta.github.io`.
 - No sign-up; each app is a static page served by GitHub Pages from its `main` branch.
