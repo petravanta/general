@@ -151,7 +151,7 @@ Conventions the apps already share:
 
 - Light and dark themes with the shared theme switch (see *Light and dark themes* above).
 - Phone-first layout: `viewport-fit=cover`, safe-area insets on sticky headers and sheets, 16px minimum side gutter.
-- User data in the browser with optional Google Drive sync, as *User data* below describes.
+- User data in the browser with optional Google Drive sync, as *User data* above describes.
 - No sign-up; each app is a static page served by GitHub Pages from its `main` branch.
 
 When you change the shared look, update `shared/theme.css` here and the inlined copy in each app together.
