@@ -18,13 +18,16 @@
 .app.fitness{--app:#4f46c8;--app-soft:#e6e4fb}
 .app.skating{--app:#c2306f;--app-soft:#f8dde8}
 .app.voice{--app:#2f3c95;--app-soft:#e2e5f6}
+.app.nutrition{--app:#c2410c;--app-soft:#fde4d6}
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]) .app.fitness{--app:#9d95ff;--app-soft:#25224d}
   :root:not([data-theme="light"]) .app.skating{--app:#f0679f;--app-soft:#3d1a2a}
-  :root:not([data-theme="light"]) .app.voice{--app:#9aa6ff;--app-soft:#1e2447}}
+  :root:not([data-theme="light"]) .app.voice{--app:#9aa6ff;--app-soft:#1e2447}
+  :root:not([data-theme="light"]) .app.nutrition{--app:#fb8a4c;--app-soft:#3d2014}}
 :root[data-theme="dark"] .app.fitness{--app:#9d95ff;--app-soft:#25224d}
 :root[data-theme="dark"] .app.skating{--app:#f0679f;--app-soft:#3d1a2a}
 :root[data-theme="dark"] .app.voice{--app:#9aa6ff;--app-soft:#1e2447}
+:root[data-theme="dark"] .app.nutrition{--app:#fb8a4c;--app-soft:#3d2014}
 
 .topbar{padding-block:14px}
 .theme-slot{margin-left:auto;display:flex}
@@ -86,6 +89,12 @@ footer a{color:var(--muted)}
       <h2><a href="https://petravanta.github.io/voicetrainer/">VoiceTrainer</a></h2>
       <p>Live resonance, vowel, sibilant and pitch feedback for voice training, with guided drills and reading practice.</p>
       <div class="links"><span class="open" aria-hidden="true">Open →</span><a class="src" href="https://github.com/petravanta/voicetrainer">Source</a></div>
+    </li>
+    <li class="app nutrition">
+      <div class="icon"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="17" r="13" fill="var(--app)"/><path d="M16 10c3.5-4 8-3.5 8-3.5s.5 4.5-3.5 8c-2 1.7-4.5 1.5-4.5 1.5S15.6 12 16 10z" fill="var(--surface)"/><circle cx="16" cy="19" r="4" fill="var(--surface)"/></svg></div>
+      <h2><a href="https://petravanta.github.io/nutrition-helper/">Nutrition Helper</a></h2>
+      <p>Logs food against daily budgets for calories, protein, fat, carbs and sodium, and tracks weigh-ins and body fat toward a goal weight.</p>
+      <div class="links"><span class="open" aria-hidden="true">Open →</span><a class="src" href="https://github.com/petravanta/nutrition-helper">Source</a></div>
     </li>
   </ul>
 </main>
