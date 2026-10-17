@@ -6,7 +6,7 @@
 # Running it again updates the rule in place, so it's also how you roll out a change to the rule.
 set -euo pipefail
 cd "$(dirname "$0")"
-repos=(general fitness-coach skating-mentor voicetrainer nutrition-helper)
+repos=(general fitness-coach skating-mentor voicetrainer nutrition-helper special-trip-planner)
 if [ $# -gt 0 ]; then repos=("$@"); fi
 for r in "${repos[@]}"; do
   id=$(gh api "repos/petravanta/$r/rulesets" --jq '.[] | select(.name=="Protect main") | .id')
