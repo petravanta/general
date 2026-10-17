@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Personal growth apps</title>
-<meta name="description" content="Personal growth apps: Fitness Coach, Skating Mentor and VoiceTrainer.">
+<meta name="description" content="Personal growth apps: Fitness Coach, Skating Mentor, VoiceTrainer, Nutrition Helper and Special Trip Planner.">
 <script>try{var t=localStorage.getItem('petravanta.theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -19,15 +19,18 @@
 .app.skating{--app:#c2306f;--app-soft:#f8dde8}
 .app.voice{--app:#2f3c95;--app-soft:#e2e5f6}
 .app.nutrition{--app:#c2410c;--app-soft:#fde4d6}
+.app.trip{--app:#1d6fb8;--app-soft:#e0ecf8}
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]) .app.fitness{--app:#9d95ff;--app-soft:#25224d}
   :root:not([data-theme="light"]) .app.skating{--app:#f0679f;--app-soft:#3d1a2a}
   :root:not([data-theme="light"]) .app.voice{--app:#9aa6ff;--app-soft:#1e2447}
-  :root:not([data-theme="light"]) .app.nutrition{--app:#fb8a4c;--app-soft:#3d2014}}
+  :root:not([data-theme="light"]) .app.nutrition{--app:#fb8a4c;--app-soft:#3d2014}
+  :root:not([data-theme="light"]) .app.trip{--app:#6cb4ff;--app-soft:#132a42}}
 :root[data-theme="dark"] .app.fitness{--app:#9d95ff;--app-soft:#25224d}
 :root[data-theme="dark"] .app.skating{--app:#f0679f;--app-soft:#3d1a2a}
 :root[data-theme="dark"] .app.voice{--app:#9aa6ff;--app-soft:#1e2447}
 :root[data-theme="dark"] .app.nutrition{--app:#fb8a4c;--app-soft:#3d2014}
+:root[data-theme="dark"] .app.trip{--app:#6cb4ff;--app-soft:#132a42}
 
 .topbar{padding-block:14px}
 .theme-slot{margin-left:auto;display:flex}
@@ -95,6 +98,12 @@ footer a{color:var(--muted)}
       <h2><a href="https://petravanta.github.io/nutrition-helper/">Nutrition Helper</a></h2>
       <p>Logs food against daily budgets for calories, protein, fat, carbs and sodium, and tracks weigh-ins and body fat toward a goal weight.</p>
       <div class="links"><span class="open" aria-hidden="true">Open →</span><a class="src" href="https://github.com/petravanta/nutrition-helper">Source</a></div>
+    </li>
+    <li class="app trip">
+      <div class="icon"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="13" fill="var(--app)"/><path d="M7 23l6.5-11 3.5 6 2-3 6 8z" fill="var(--surface)"/><circle cx="21" cy="10" r="2" fill="var(--surface)"/></svg></div>
+      <h2><a href="https://petravanta.github.io/special-trip-planner/">Special Trip Planner</a></h2>
+      <p>Plans a surgery, a long hike, a festival or a conference from a template written by people who have done it, with the why behind every rule.</p>
+      <div class="links"><span class="open" aria-hidden="true">Open →</span><a class="src" href="https://github.com/petravanta/special-trip-planner">Source</a></div>
     </li>
   </ul>
 </main>
