@@ -58,7 +58,7 @@ Content that people might want to review or add to (exercises, sports, equipment
 - The README has an **Extending the app** table listing each dataset, its file, its schema and what it controls, and `CONTRIBUTING.md` walks a non-programmer through adding an entry.
 - Behavior is still code. A new kind of entry that the app has to treat differently (a new movement pattern, a new skating style) means changing the code and the schema enum together.
 
-Fitness Coach (exercises, sports, equipment) and Skating Mentor (skills) follow this. VoiceTrainer's drills and reading texts are still in its source.
+Fitness Coach (exercises, sports, equipment), Skating Mentor (skills) and VoiceTrainer (reading texts, practice words, breath and control exercises) follow this. VoiceTrainer has a build step, so `build.js` inlines its data files into the page instead of fetching them.
 
 ## Notes for coding agents
 
