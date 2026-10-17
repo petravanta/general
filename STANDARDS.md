@@ -24,7 +24,7 @@ Add two things to the app's HTML:
 ## Adding a new app
 
 1. Publish it on GitHub Pages under `petravanta.github.io/<repo>/`.
-2. Add the back link (above) and the theme switch (below), and follow *Data, not code* for its content.
+2. Add the back link (above) and the theme switch (below), follow *Built-in knowledge* for its content, and *User data* for what people save.
 3. Apply the *Protect main* ruleset: `./github/apply-ruleset.sh <repo>`.
 4. Add a card for it to [`index.html`](index.html): copy an existing `<li class="app …">`, set its name, link, one-line description and icon, and add a `--app` / `--app-soft` accent pair (light and dark) in the `<style>` block. Also add the repo to `repos` in `github/apply-ruleset.sh`.
 
@@ -46,7 +46,11 @@ Add two things to the app's HTML:
 - It sets `data-theme="light"` or `data-theme="dark"` on `<html>` (or removes it for *Match system*), and keeps `<meta name="theme-color">` in step.
 - For this to work, the app's colors must be tokens on `:root`, with dark values under `@media (prefers-color-scheme: dark)` guarded by `:root:not([data-theme="light"])`, and again under `:root[data-theme="dark"]`. Anything drawn in JavaScript (canvas, SVG) should read the tokens and redraw when `data-theme` changes.
 
-## Data, not code, for what an app knows
+## Built-in knowledge
+
+What an app knows (exercises, skills, drills, trip templates) is data, not code, and it is written so a newcomer can trust it and an expert can check it.
+
+### Data, not code
 
 Content that people might want to review or add to (exercises, sports, equipment, skills, drills) lives in JSON files under `data/` in each app, not as literals in the code. That keeps every extension point easy to see, and lets anyone add an entry with a pull request.
 
@@ -57,8 +61,72 @@ Content that people might want to review or add to (exercises, sports, equipment
 - A `Check data` GitHub Actions workflow runs on every pull request: it validates each file against its schema with `ajv-cli`, and `scripts/check-data.js` checks what a schema can't (unique ids, references that exist).
 - The README has an **Extending the app** table listing each dataset, its file, its schema and what it controls, and `CONTRIBUTING.md` walks a non-programmer through adding an entry.
 - Behavior is still code. A new kind of entry that the app has to treat differently (a new movement pattern, a new skating style) means changing the code and the schema enum together.
+- When each entry is a large nested document rather than a row (a whole trip template, say), the dataset is a folder instead: one file per entry, `data/<dataset>/<id>.json`, plus `data/<dataset>.json` listing the entry ids in display order. One schema still covers every entry, and the same `Check data` workflow validates each file.
 
 Fitness Coach (exercises, sports, equipment), Skating Mentor (skills) and VoiceTrainer (reading texts, practice words, breath and control exercises) follow this. VoiceTrainer has a build step, so `build.js` inlines its data files into the page instead of fetching them.
+
+### Explain the why
+
+- An entry that tells people to do or avoid something says why, in a `why` field, especially when the reason isn't obvious. A bare rule gets ignored the first time it is inconvenient; a reason lets people judge the cases the rule didn't foresee.
+- Where the reason comes from is part of it: `basis` says whether it is official (the instructions of the professional or organizer in charge), evidence (a guideline or study) or experience (what past participants learned), and `sources` lists ids from a per-dataset list of sources with a title and a link.
+- Any editor in the app that creates advice nudges for the why when it is missing, rather than requiring it.
+
+### Snapshots, not authorities
+
+- Built-in and shared knowledge is a dated snapshot of shared experience. Each shareable bundle of advice carries an `asOf` date, and the app shows it wherever the advice appears.
+- Living experts (a surgeon, a guide, an event organizer, a coach) are always assumed to be right when their guidance differs from the app's. Apps say so in plain words, next to the advice rather than buried in an About page.
+
+### Knowledge that stays out of the repo
+
+- A repo holds only knowledge that is fine to publish. Anything sensitive or proprietary (a specific clinic's instructions, a private group's notes, anything that would identify the person who wrote it) is shared as a file outside the repo and loaded with the app's **Import**.
+- Imported knowledge passes the same schema as built-in knowledge, lives with the user's data (below), and is never committed.
+
+## User data
+
+Everything a person saves belongs to them: it stays in their browser and, if they choose, in their own Google Drive. It never goes to a server of ours or into a repo.
+
+### Where it lives
+
+- The browser keeps the working copy in `localStorage`.
+- **Google Drive sync** is optional. Each app keeps one JSON file, `<App name> data.json`, in the user's own Drive, using the `drive.file` scope (the app sees only the file it created) and the shared OAuth client that allows `https://petravanta.github.io`. It saves a few seconds after each change, and merges with the browser copy on connect and whenever the app comes back into view.
+- **Export backup** downloads the whole document as JSON, and **Import backup** merges one back in. Imports from other apps (a Fitbod CSV, a MacroFactor export) are read in the browser and become ordinary records.
+
+### Shape
+
+One JSON document per app:
+
+```json
+{
+  "version": 1,
+  "settings": { "updatedAt": "2026-10-17T08:00:00Z" },
+  "<records>": [ { "id": "…", "u": "2026-10-17T08:00:00Z" } ],
+  "deleted": [ "…" ]
+}
+```
+
+- `version` is the document's format version. When the shape changes, the app upgrades older documents on load and never writes an older format.
+- Settings-like objects (a profile, targets, preferences) carry `updatedAt`.
+- Records (a workout, a food entry, a plan) live in named top-level lists. Each has a random, stable `id` and `u`, the time of its last edit.
+- `deleted` lists the ids of removed records, so a deletion on one device carries to the others.
+- Records refer to built-in knowledge by its id, never by copying its name.
+
+### Merging two copies
+
+When Drive and the browser (or an imported backup) disagree, nothing logged on either side is lost:
+
+1. Records are combined by `id`; when both have the same record, the one with the newer `u` wins.
+2. Any id in either `deleted` list is dropped, and the lists are joined.
+3. For each settings-like object, the newer `updatedAt` wins.
+
+Nutrition Helper follows these rules. Fitness Coach merges by id and `deleted` but does not stamp `u` yet, and neither app writes `version` yet; both should catch up when they next change their data.
+
+### Sharing what you know, not who you are
+
+When an app lets people share what they have built (a template, a routine), sharing is a separate export from the backup:
+
+- The app's data model keeps shareable knowledge apart from private tracking (doses, ticks, logs, dates, personal contacts), so the share export leaves the private side out by construction rather than by scrubbing fields.
+- Before the file is written, a preview shows everything that will go out, including free text the user typed.
+- The shared file names its format and version, `{ "format": "<app>-<kind>", "formatVersion": 1, … }`, and passes the same schema as the app's built-in knowledge, so it can be imported or proposed for the repo by pull request.
 
 ## Notes for coding agents
 
@@ -95,9 +163,7 @@ Conventions the apps already share:
 
 - Light and dark themes with the shared theme switch (see *Light and dark themes* above).
 - Phone-first layout: `viewport-fit=cover`, safe-area insets on sticky headers and sheets, 16px minimum side gutter.
-- Data stays in the browser (`localStorage`), with **Export backup** / **Import backup** as JSON, and optional Google Drive sync using the `drive.file` scope and the shared OAuth client that allows `https://petravanta.github.io`.
-- Google Drive is where a user's history lives across devices: each app keeps one JSON file (`<App name> data.json`) in the user's own Drive, saved a few seconds after each change and merged with the browser copy on connect and when the app comes back into view. User data, including imports from other apps, is loaded from inside the app and never committed to a repo.
-- Merging two copies (Drive, or an imported backup): logged records carry an `id` and are combined by id, so nothing logged on either device is lost; a `deleted` list of ids carries deletions across; and settings-like objects carry an `updatedAt`, with the newer copy winning. Nutrition Helper also stamps each record with `u` (last edit time) so the newer edit of the same record wins.
+- User data in the browser with optional Google Drive sync, as *User data* below describes.
 - No sign-up; each app is a static page served by GitHub Pages from its `main` branch.
 
 When you change the shared look, update `shared/theme.css` here and the inlined copy in each app together.
