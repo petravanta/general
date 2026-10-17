@@ -48,7 +48,7 @@ Add two things to the app's HTML:
 
 ## Built-in knowledge
 
-What an app knows (exercises, skills, drills, trip templates) is data, not code, and it is written so a newcomer can trust it and an expert can check it.
+What an app knows (exercises, skills, drills, trip templates) is data, not code.
 
 ### Data, not code
 
@@ -65,21 +65,9 @@ Content that people might want to review or add to (exercises, sports, equipment
 
 Fitness Coach (exercises, sports, equipment), Skating Mentor (skills) and VoiceTrainer (reading texts, practice words, breath and control exercises) follow this. VoiceTrainer has a build step, so `build.js` inlines its data files into the page instead of fetching them.
 
-### Explain the why
+### Say why when it isn't obvious
 
-- An entry that tells people to do or avoid something says why, in a `why` field, especially when the reason isn't obvious. A bare rule gets ignored the first time it is inconvenient; a reason lets people judge the cases the rule didn't foresee.
-- Where the reason comes from is part of it: `basis` says whether it is official (the instructions of the professional or organizer in charge), evidence (a guideline or study) or experience (what past participants learned), and `sources` lists ids from a per-dataset list of sources with a title and a link.
-- Any editor in the app that creates advice nudges for the why when it is missing, rather than requiring it.
-
-### Snapshots, not authorities
-
-- Built-in and shared knowledge is a dated snapshot of shared experience. Each shareable bundle of advice carries an `asOf` date, and the app shows it wherever the advice appears.
-- Living experts (a surgeon, a guide, an event organizer, a coach) are always assumed to be right when their guidance differs from the app's. Apps say so in plain words, next to the advice rather than buried in an About page.
-
-### Knowledge that stays out of the repo
-
-- A repo holds only knowledge that is fine to publish. Anything sensitive or proprietary (a specific clinic's instructions, a private group's notes, anything that would identify the person who wrote it) is shared as a file outside the repo and loaded with the app's **Import**.
-- Imported knowledge passes the same schema as built-in knowledge, lives with the user's data (below), and is never committed.
+- An entry whose advice or rule isn't self-evident can carry an optional `why`: a short reason that motivates people to follow it and lets them judge cases the rule didn't foresee. Each dataset's schema decides which entries get a `why` and what else goes with it (sources, say).
 
 ## User data
 
