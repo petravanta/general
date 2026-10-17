@@ -8,7 +8,11 @@
    The button goes into a [data-theme-switch] element if the page has one, otherwise at the end of the
    row that holds the [data-hub-link]. The choice is stored under one key on petravanta.github.io, so
    it carries across all the apps. Apps only need their tokens to follow STANDARDS.md: dark values under
-   :root:not([data-theme="light"]) in the media query and again under :root[data-theme="dark"]. */
+   :root:not([data-theme="light"]) in the media query and again under :root[data-theme="dark"].
+
+   An app with its own theme setting stays in step both ways: the button follows any change the app
+   makes to data-theme, and a click fires a "petravanta:themechange" event on document with
+   detail.mode set to 'system', 'light' or 'dark', so the app can save it too. */
 (function () {
   var KEY = 'petravanta.theme';
   var MODES = ['system', 'light', 'dark'];
@@ -30,7 +34,10 @@
     '@media (pointer:coarse){.theme-switch{width:40px;height:40px}}';
 
   function read() {
-    try { var t = localStorage.getItem(KEY); return t === 'light' || t === 'dark' ? t : 'system'; } catch (e) { return 'system'; }
+    try { var t = localStorage.getItem(KEY); if (t === 'system' || t === 'light' || t === 'dark') return t; } catch (e) {}
+    // Nothing chosen on this device yet: keep whatever the page already shows
+    var a = document.documentElement.getAttribute('data-theme');
+    return a === 'light' || a === 'dark' ? a : 'system';
   }
 
   function apply(mode) {
@@ -45,6 +52,10 @@
       var isDark = /dark/.test(media);
       m.setAttribute('media', mode === 'system' ? media : (isDark === (mode === 'dark') ? 'all' : 'not all'));
     }
+  }
+
+  function save(mode) {
+    try { localStorage.setItem(KEY, mode); } catch (e) {}
   }
 
   function render(btn, mode) {
@@ -75,10 +86,21 @@
     render(btn, mode);
     btn.addEventListener('click', function () {
       mode = MODES[(MODES.indexOf(mode) + 1) % MODES.length];
-      try { mode === 'system' ? localStorage.removeItem(KEY) : localStorage.setItem(KEY, mode); } catch (e) {}
+      save(mode);
       apply(mode);
       render(btn, mode);
+      document.dispatchEvent(new CustomEvent('petravanta:themechange', { detail: { mode: mode } }));
     });
+    // The app changed the theme itself (for example from its own settings)
+    new MutationObserver(function () {
+      var t = document.documentElement.getAttribute('data-theme');
+      var now = t === 'light' || t === 'dark' ? t : 'system';
+      if (now === mode) return;
+      mode = now;
+      save(mode);
+      apply(mode);
+      render(btn, mode);
+    }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
     // Another tab or app changed it
     window.addEventListener('storage', function (e) {
       if (e.key !== KEY) return;
