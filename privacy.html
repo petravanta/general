@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Privacy policy · petravanta apps</title>
+<meta name="description" content="How petravanta apps handle your data and Google Drive sign-in.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="shared/theme.css">
+<style>
+:root{--accent:#11897a;--accent-ink:#ffffff;--accent-soft:#d9f1ec}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--accent:#3cc3ad;--accent-ink:#06201c;--accent-soft:#0f3530}}
+:root[data-theme="dark"]{--accent:#3cc3ad;--accent-ink:#06201c;--accent-soft:#0f3530}
+.topbar{padding-block:14px}
+.brand a{color:inherit;text-decoration:none;display:flex;align-items:center;gap:10px}
+.doc{max-width:68ch;padding-block:32px 24px}
+.doc h1{font-family:var(--f-display);font-weight:700;font-size:clamp(26px,5vw,34px);letter-spacing:-.02em;line-height:1.15;margin:0 0 6px}
+.doc .updated{color:var(--muted);font-size:14px;margin-bottom:24px}
+.doc h2{margin:28px 0 8px}
+.doc p,.doc ul{margin:0 0 12px;font-size:16px}
+.doc ul{padding-left:20px}
+.doc li{margin-bottom:6px}
+.doc a{color:var(--accent)}
+.doc code{font-family:var(--f-mono);font-size:.9em;background:var(--sunk);padding:1px 5px;border-radius:4px}
+footer{padding-block:24px 60px;color:var(--faint);font-size:13px}
+footer a{color:var(--muted)}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand"><a href="./">
+        <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="3" y="3" width="11" height="11" rx="3" fill="var(--accent)"/><rect x="18" y="3" width="11" height="11" rx="3" fill="var(--ink)"/><rect x="3" y="18" width="11" height="11" rx="3" fill="var(--ink)"/><rect x="18" y="18" width="11" height="11" rx="3" fill="var(--accent)"/></svg>
+        petravanta</a>
+      </div>
+    </div>
+  </div>
+</header>
+<main class="wrap">
+<article class="doc">
+<h1>Privacy policy</h1>
+<p class="updated">Last updated 16 October 2026</p>
+
+<p>This policy covers the apps published at <a href="https://petravanta.github.io/general/">petravanta.github.io</a>, including Fitness Coach, Skating Mentor and VoiceTrainer. They are personal practice tools made by one person, not a company.</p>
+
+<h2>The short version</h2>
+<ul>
+  <li>There is no petravanta server and no petravanta account. Each app is a static web page that runs in your browser.</li>
+  <li>If you connect Google Drive, your data is saved to a file in <em>your own</em> Google Drive. It goes straight from your browser to Google. Nobody else, including the developer, can see it.</li>
+  <li>There are no ads, no analytics and no tracking, and nothing is sold or shared.</li>
+</ul>
+
+<h2>What the apps store</h2>
+<p>The apps store what you type into them: your profile, settings, equipment, favorite exercises or skills, plans, and the history of your practice sessions. Fitness Coach can also hold workout history that you import from a file.</p>
+
+<h2>Google Drive sign-in</h2>
+<p>When you choose <strong>Connect Google Drive</strong>, Google asks for your permission. The apps request only the <code>drive.file</code> permission, which lets an app see and change only the files that app itself created. An app cannot read, list or change any other file in your Drive.</p>
+<p>With that permission, each app keeps one data file in your Drive, such as <code>Fitness Coach data.json</code>. The app reads this file when it opens and saves to it as you make changes.</p>
+<p>Your browser keeps a short-lived Google access token and the ID of your data file, so you don't have to sign in on every visit. It also holds changes that have not reached Drive yet, for example while you're offline, and deletes them once they are saved. The token expires after about an hour, and the apps never receive your Google password.</p>
+<p>The apps' use of information received from Google APIs follows the <a href="https://developers.google.com/terms/api-services-user-data-policy">Google API Services User Data Policy</a>, including its Limited Use requirements. Data from your Drive is used only to show it back to you in the app, is never transferred to anyone, and is never used for advertising.</p>
+
+<h2>Without Google Drive</h2>
+<p>If you use an app without connecting Drive, it works as a demo or keeps your data only in your browser's storage on that device. Clearing your browser data removes it.</p>
+
+<h2>Services the pages load</h2>
+<p>The pages are hosted on GitHub Pages and load fonts from Google Fonts. Like any website, GitHub and Google receive your IP address and basic browser information when your browser fetches those files. Their own privacy policies cover that: <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement">GitHub</a> and <a href="https://policies.google.com/privacy">Google</a>.</p>
+
+<h2>Your control over your data</h2>
+<ul>
+  <li><strong>See or copy it:</strong> the data file is in your Google Drive, where you can open, download or move it.</li>
+  <li><strong>Delete it:</strong> delete the file from your Drive. Signing out in the app's settings also clears the token and file ID from your browser.</li>
+  <li><strong>Revoke access:</strong> remove the app at <a href="https://myaccount.google.com/connections">myaccount.google.com/connections</a>. The app then can't reach your Drive until you connect again.</li>
+</ul>
+
+<h2>Children</h2>
+<p>The apps are not directed at children under 13.</p>
+
+<h2>Changes</h2>
+<p>If this policy changes, the new version will be posted on this page with a new date. The full history is public in the <a href="https://github.com/petravanta/general/commits/main/privacy.html">petravanta/general</a> repository.</p>
+
+<h2>Contact</h2>
+<p>Questions or requests can go to the <a href="https://github.com/petravanta/general/issues">petravanta/general issue tracker</a>.</p>
+</article>
+</main>
+<footer class="wrap">
+  <a href="./">All apps</a> · <a href="privacy.html">Privacy</a> · <a href="terms.html">Terms</a>
+</footer>
+</body>
+</html>
