@@ -1,6 +1,6 @@
 # Shared standards for petravanta's apps
 
-These apply to every app linked from the hub at **https://petravanta.github.io/general/**: [Fitness Coach](https://github.com/petravanta/fitness-coach), [Skating Mentor](https://github.com/petravanta/skating-mentor), [VoiceTrainer](https://github.com/petravanta/voicetrainer), [Nutrition Helper](https://github.com/petravanta/nutrition-helper) and [Special Trip Planner](https://github.com/petravanta/special-trip-planner).
+These apply to every app linked from the hub at **https://petravanta.github.io/general/**: [Fitness Coach](https://github.com/petravanta/fitness-coach), [Skating Mentor](https://github.com/petravanta/skating-mentor), [VoiceTrainer](https://github.com/petravanta/voicetrainer), [Nutrition Helper](https://github.com/petravanta/nutrition-helper), [Special Trip Planner](https://github.com/petravanta/special-trip-planner) and [Photo Timeline](https://github.com/petravanta/photo-timeline).
 
 ## Back link to the hub
 
@@ -135,7 +135,7 @@ Or by hand: in the repo, **Settings → Rules → Rulesets → New ruleset → I
 
 ## Shared look
 
-Fitness Coach, Skating Mentor, Nutrition Helper and Special Trip Planner (and the hub) share one set of colors, fonts and components. The canonical copy is [`shared/theme.css`](shared/theme.css). Each app inlines it between the `Shared look` and `end shared look` comments and only overrides the `--accent`, `--accent-ink` and `--accent-soft` values after it:
+Fitness Coach, Skating Mentor, Nutrition Helper, Special Trip Planner and Photo Timeline (and the hub) share one set of colors, fonts and components. The canonical copy is [`shared/theme.css`](shared/theme.css). Each app inlines it between the `Shared look` and `end shared look` comments and only overrides the `--accent`, `--accent-ink` and `--accent-soft` values after it:
 
 | App | Light accent | Dark accent |
 | --- | --- | --- |
@@ -145,6 +145,7 @@ Fitness Coach, Skating Mentor, Nutrition Helper and Special Trip Planner (and th
 | VoiceTrainer | `#2f3c95` indigo-blue | `#9aa6ff` |
 | Nutrition Helper | `#c2410c` orange | `#fb8a4c` |
 | Special Trip Planner | `#1d6fb8` blue | `#6cb4ff` |
+| Photo Timeline | `#7442b8` violet | `#bb94ff` |
 
 VoiceTrainer has its own type and panel styles but follows the same token names for `--bg`, `--ink`, `--muted`, `--line` and `--accent`.
 
