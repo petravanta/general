@@ -116,6 +116,19 @@ When an app lets people share what they have built (a template, a routine), shar
 - Before the file is written, a preview shows everything that will go out, including free text the user typed.
 - The shared file names its format and version, `{ "format": "<app>-<kind>", "formatVersion": 1, … }`, and passes the same schema as the app's built-in knowledge, so it can be imported or proposed for the repo by pull request.
 
+## Adding photos
+
+Any app that lets people add photos (or other images) also takes them by drag and drop from the desktop, not only through its button or file picker.
+
+- **The whole page is the drop target** while files are dragged over it, so people don't have to aim at a small box. A full-page overlay appears for as long as the drag lasts and says where the photos will go ("Drop to add 3 photos to Summer 2024").
+- **Where the spot means something, the drop uses it.** If the page shows places a photo can go (a track, a day, a list), dropping onto one puts the photos there; dropping anywhere else uses the same destination the button would.
+- **Only photos are taken.** Other files in the same drop are skipped and the message says how many and why; a drop with no photos at all says which formats the app accepts.
+- **One path for every way in.** A dropped photo goes through the same code as one from the button: the same resizing, date reading, progress and error messages.
+- **The browser never opens a dropped file in place of the app.** Prevent the default on `dragover` and `drop` for file drags anywhere on the page, even where the app doesn't take them (with a drawer open, say).
+- **The button stays.** Phones have no drag and drop, and keyboard and screen-reader users need the button. On devices with a fine pointer (`@media (pointer: fine)`), say near the button or empty state that photos can be dropped.
+
+Photo Timeline follows this.
+
 ## Notes for coding agents
 
 Each app has an `AGENTS.md` that links back here and lists only what's specific to that app, plus a one-line `CLAUDE.md` containing `@AGENTS.md` so Claude Code reads the same notes.
