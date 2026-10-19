@@ -9,10 +9,21 @@
    This script styles it as a small pill using the app's own --muted / --line / --accent tokens, then,
    once shared/apps.json has loaded, turns it into a menu: Home (the hub) plus every app, so people can
    jump straight from one app to another. If the list can't load, the pill stays a plain link to the hub.
-   If an app has no [data-hub-link] element, a slim bar with the link is added at the top of <body>. */
+   If an app has no [data-hub-link] element, a slim bar with the link is added at the top of <body>.
+   When Chrome offers to install the app (it has a manifest and service worker), the menu also gets an
+   "Install app" item, so people find it without the browser's own menu. */
 (function () {
   var HUB = 'https://petravanta.github.io/general/';
   if (location.href.indexOf(HUB) === 0 && !/\/shared\//.test(location.pathname)) return;
+
+  // Chrome's install offer. Kept (not prevented) so the browser's own banner still shows too.
+  var installOffer = null;
+  function syncInstall() {
+    var items = document.querySelectorAll('.hub-install');
+    for (var i = 0; i < items.length; i++) items[i].hidden = !installOffer;
+  }
+  window.addEventListener('beforeinstallprompt', function (e) { installOffer = e; syncInstall(); });
+  window.addEventListener('appinstalled', function () { installOffer = null; syncInstall(); });
 
   var css =
     '.hub-link{display:inline-flex;align-items:center;gap:6px;flex:none;' +
@@ -40,12 +51,17 @@
     '.hub-menu-panel .hub-dot{width:10px;height:10px;border-radius:50%;flex:none;background:var(--app-dot)}' +
     '.hub-menu-panel .hub-home svg{width:14px;height:14px;margin:0 -2px;flex:none;color:var(--muted,#566771)}' +
     '.hub-menu-panel .hub-sep{height:1px;margin:6px 4px;background:var(--line,#cdd6db)}' +
+    '.hub-menu-panel .hub-install[hidden]{display:none}' +
+    '.hub-menu-panel .hub-install a svg{width:14px;height:14px;margin:0 -2px;flex:none;color:var(--muted,#566771)}' +
     '@media (prefers-reduced-motion: reduce){.hub-link .hub-caret{transition:none}}';
 
   var icon =
     '<svg viewBox="0 0 16 16" aria-hidden="true" fill="currentColor">' +
     '<rect x="1.5" y="1.5" width="5.5" height="5.5" rx="1.4"/><rect x="9" y="1.5" width="5.5" height="5.5" rx="1.4"/>' +
     '<rect x="1.5" y="9" width="5.5" height="5.5" rx="1.4"/><rect x="9" y="9" width="5.5" height="5.5" rx="1.4"/></svg>';
+  var down =
+    '<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" ' +
+    'stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v8M4.5 6.5 8 10l3.5-3.5M2.5 13.5h11"/></svg>';
   var caret =
     '<svg class="hub-caret" viewBox="0 0 10 10" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" ' +
     'stroke-linecap="round" stroke-linejoin="round"><path d="M2 3.75 5 6.75 8 3.75"/></svg>';
@@ -103,13 +119,27 @@
         esc(app.accentDark || app.accent || '') + '"' + (here(app.url) ? ' aria-current="page"' : '') + '>' +
         '<span class="hub-dot" aria-hidden="true"></span><span>' + esc(app.name) + '</span></a></li>';
     });
-    panel.innerHTML = home + items.join('');
+    var install =
+      '<li class="hub-install" hidden><span class="hub-sep" role="separator" style="display:block"></span>' +
+      '<a href="#" data-hub-install>' + down + '<span>Install app</span></a></li>';
+    panel.innerHTML = home + items.join('') + install;
 
     wrap.appendChild(btn);
     wrap.appendChild(panel);
     a.parentNode.replaceChild(wrap, a);
 
-    function links() { return panel.querySelectorAll('a'); }
+    function links() { return panel.querySelectorAll('li:not([hidden]) > a'); }
+
+    syncInstall();
+    panel.querySelector('[data-hub-install]').addEventListener('click', function (e) {
+      e.preventDefault();
+      close(true);
+      if (!installOffer) return;
+      var offer = installOffer;
+      installOffer = null;
+      syncInstall();
+      offer.prompt();
+    });
 
     function paintDots() {
       var dark = isDark(), ls = panel.querySelectorAll('a[data-accent]');

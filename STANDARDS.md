@@ -25,7 +25,7 @@ Add two things to the app's HTML:
 ## Adding a new app
 
 1. Publish it on GitHub Pages under `petravanta.github.io/<repo>/`.
-2. Add the back link (above) and the theme switch (below), follow *Built-in knowledge* for its content, and *User data* for what people save.
+2. Add the back link (above), the theme switch (below) and the install files (*Installing on a phone*), follow *Built-in knowledge* for its content, and *User data* for what people save.
 3. Apply the *Protect main* ruleset: `./github/apply-ruleset.sh <repo>`.
 4. Add a card for it to [`index.html`](index.html): copy an existing `<li class="app …">`, set its name, link, one-line description and icon, and add a `--app` / `--app-soft` accent pair (light and dark) in the `<style>` block. Also add the app to [`shared/apps.json`](shared/apps.json) (id, name, url and the same light and dark accents) so it shows in every app's menu, and add the repo to `repos` in `github/apply-ruleset.sh`.
 
@@ -132,13 +132,52 @@ Photo Timeline follows this.
 
 ## Installing on a phone
 
-Apps people use day to day on a phone are installable web apps, so Chrome on Android offers *Install app* and they open full screen from their own icon.
+Every app (and the hub) is an installable web app. In Chrome on Android, *Add to Home screen* / *Install app* puts it on the home screen with its own icon, and it opens full screen in its own window, also offline. Chrome and Edge on a computer offer the same install from the address bar, and Safari on iPhone uses *Share → Add to Home Screen*.
 
-- **A manifest** (`manifest.webmanifest`, linked from the page) with `name`, a short `short_name` for under the icon, relative `start_url`, `scope` and `id` of `./`, `display: standalone`, and PNG icons at 192 and 512 px, the 512 also marked `maskable` with the artwork inside the central 80%. Add `apple-touch-icon` (180 px) for iPhone.
-- **Shortcuts** for the one or two things people open the app to do, as `./?do=<action>` URLs. The page reads `do` on load, does it, and removes it from the address with `history.replaceState` so a reload doesn't repeat it.
-- **A small service worker** (`sw.js`) so the app opens offline: the page network-first with the cached copy as fallback (so updates show the next time it opens online), the app's own files and fonts from cache, and everything else (APIs, Google sign-in, Drive) left to the network.
+An app needs four things:
 
-Nutrition Helper follows this.
+1. **Icons**, made with [`tools/make-icons.js`](tools/make-icons.js) from a white glyph on the app's light accent (the glyphs are in [`tools/glyphs/`](tools/glyphs/)):
+
+   ```sh
+   node tools/make-icons.js tools/glyphs/<app>.svg '<light accent>' ../<app>
+   ```
+
+   It writes `icon.svg`, `icon-192.png` and `icon-512.png` (rounded), `icon-maskable-512.png` (full bleed, artwork inside the central 80% so Android can crop it to any shape) and `apple-touch-icon.png` (180 px, for iPhone).
+
+2. **A manifest**, `manifest.webmanifest`, with `name`, a short `short_name` for under the icon, `id`, `start_url` and `scope` all `./`, `display: standalone`, `background_color: #eef2f4`, `theme_color: #ffffff`, and the icons above (the 512 also listed as `maskable`). Copy one from an app that has it, such as Skating Mentor.
+
+3. **Tags in `<head>`**, next to the theme-color pair the theme switch already uses:
+
+   ```html
+   <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+   <meta name="theme-color" content="#172129" media="(prefers-color-scheme: dark)">
+   <link rel="manifest" href="manifest.webmanifest">
+   <link rel="icon" href="icon.svg" type="image/svg+xml">
+   <link rel="apple-touch-icon" href="apple-touch-icon.png">
+   ```
+
+4. **A service worker**, `sw.js`, so Chrome offers the install and the app opens offline. It lists the files the app needs to start and loads the shared worker, [`shared/app-sw.js`](shared/app-sw.js):
+
+   ```js
+   self.APP_SHELL = ['./', 'manifest.webmanifest', 'icon-192.png', 'icon.svg', 'data/skills.json'];
+   importScripts('https://petravanta.github.io/general/shared/app-sw.js');
+   ```
+
+   and the page registers it just before `</body>` (only on the real site, so a claude.ai Artifact or a local file is unaffected):
+
+   ```html
+   <script>if('serviceWorker' in navigator&&/^(petravanta\.github\.io|localhost|127\.0\.0\.1)$/.test(location.hostname))navigator.serviceWorker.register('sw.js').catch(function(){})</script>
+   ```
+
+   The shared worker fetches pages and the app's own files network-first, so an update shows the next time the app opens online, falls back to the cached copy offline, keeps Google Fonts cached, and leaves everything else (Google sign-in, Drive, Photos, food databases) to the network. User data is never cached by it.
+
+When Chrome is ready to install an app, the **All apps** menu from `hub-link.js` also shows an **Install app** item.
+
+Optional: **shortcuts** in the manifest for the one or two things people open the app to do (long-press the icon), as `./?do=<action>` URLs. The page reads `do` on load, does it, and removes it from the address with `history.replaceState` so a reload doesn't repeat it. Nutrition Helper has these.
+
+An app with a build step (VoiceTrainer) keeps these files in `pwa/`, adds the head tags to its standalone page only, and copies `pwa/*` next to the page when it deploys.
+
+All apps and the hub follow this. Fitness Coach and Nutrition Helper have their own `sw.js` that predates the shared worker and does the same job.
 
 ## Notes for coding agents
 
