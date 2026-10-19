@@ -130,6 +130,16 @@ Any app that lets people add photos (or other images) also takes them by drag an
 
 Photo Timeline follows this.
 
+## Installing on a phone
+
+Apps people use day to day on a phone are installable web apps, so Chrome on Android offers *Install app* and they open full screen from their own icon.
+
+- **A manifest** (`manifest.webmanifest`, linked from the page) with `name`, a short `short_name` for under the icon, relative `start_url`, `scope` and `id` of `./`, `display: standalone`, and PNG icons at 192 and 512 px, the 512 also marked `maskable` with the artwork inside the central 80%. Add `apple-touch-icon` (180 px) for iPhone.
+- **Shortcuts** for the one or two things people open the app to do, as `./?do=<action>` URLs. The page reads `do` on load, does it, and removes it from the address with `history.replaceState` so a reload doesn't repeat it.
+- **A small service worker** (`sw.js`) so the app opens offline: the page network-first with the cached copy as fallback (so updates show the next time it opens online), the app's own files and fonts from cache, and everything else (APIs, Google sign-in, Drive) left to the network.
+
+Nutrition Helper follows this.
+
 ## Notes for coding agents
 
 Each app has an `AGENTS.md` that links back here and lists only what's specific to that app, plus a one-line `CLAUDE.md` containing `@AGENTS.md` so Claude Code reads the same notes.
