@@ -18,6 +18,7 @@ Add two things to the app's HTML:
 
 - The `<a>` is a normal link, so the back link still works where the script can't load (for example when the app runs as a claude.ai Artifact, which only allows scripts from a few CDNs).
 - [`shared/hub-link.js`](shared/hub-link.js) turns it into a small pill with a grid icon, styled with the app's own `--muted`, `--line`, `--ink` and `--accent` tokens, so it fits each app's colors and dark mode without extra CSS.
+- Once the script has loaded the app list from [`shared/apps.json`](shared/apps.json), the pill becomes a menu: **Home** (the hub) plus every app, with the current app marked, so people can jump straight from one app to another. If the list can't load, the pill stays a plain link to the hub.
 - If an app has no `[data-hub-link]` element, the script adds a slim bar with the link at the top of the page, so including the script alone is enough to get a back link.
 - Apps reference the script by URL rather than copying it, so a change here reaches every app on its next page load.
 
@@ -26,7 +27,7 @@ Add two things to the app's HTML:
 1. Publish it on GitHub Pages under `petravanta.github.io/<repo>/`.
 2. Add the back link (above) and the theme switch (below), follow *Built-in knowledge* for its content, and *User data* for what people save.
 3. Apply the *Protect main* ruleset: `./github/apply-ruleset.sh <repo>`.
-4. Add a card for it to [`index.html`](index.html): copy an existing `<li class="app …">`, set its name, link, one-line description and icon, and add a `--app` / `--app-soft` accent pair (light and dark) in the `<style>` block. Also add the repo to `repos` in `github/apply-ruleset.sh`.
+4. Add a card for it to [`index.html`](index.html): copy an existing `<li class="app …">`, set its name, link, one-line description and icon, and add a `--app` / `--app-soft` accent pair (light and dark) in the `<style>` block. Also add the app to [`shared/apps.json`](shared/apps.json) (id, name, url and the same light and dark accents) so it shows in every app's menu, and add the repo to `repos` in `github/apply-ruleset.sh`.
 
 ## Light and dark themes
 
