@@ -27,6 +27,7 @@
 .app.trip{--app:#1d6fb8;--app-soft:#e0ecf8}
 .app.photo{--app:#7442b8;--app-soft:#efe6fa}
 .app.project{--app:#2e7d32;--app-soft:#dcefdc}
+.app.study{--app:#0b7285;--app-soft:#d7eef2}
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]) .app.fitness{--app:#9d95ff;--app-soft:#25224d}
   :root:not([data-theme="light"]) .app.skating{--app:#f0679f;--app-soft:#3d1a2a}
@@ -34,7 +35,8 @@
   :root:not([data-theme="light"]) .app.nutrition{--app:#fb8a4c;--app-soft:#3d2014}
   :root:not([data-theme="light"]) .app.trip{--app:#6cb4ff;--app-soft:#132a42}
   :root:not([data-theme="light"]) .app.photo{--app:#bb94ff;--app-soft:#2a1d40}
-  :root:not([data-theme="light"]) .app.project{--app:#6fd39a;--app-soft:#143224}}
+  :root:not([data-theme="light"]) .app.project{--app:#6fd39a;--app-soft:#143224}
+  :root:not([data-theme="light"]) .app.study{--app:#5fd0e4;--app-soft:#0f2f36}}
 :root[data-theme="dark"] .app.fitness{--app:#9d95ff;--app-soft:#25224d}
 :root[data-theme="dark"] .app.skating{--app:#f0679f;--app-soft:#3d1a2a}
 :root[data-theme="dark"] .app.voice{--app:#9aa6ff;--app-soft:#1e2447}
@@ -42,6 +44,7 @@
 :root[data-theme="dark"] .app.trip{--app:#6cb4ff;--app-soft:#132a42}
 :root[data-theme="dark"] .app.photo{--app:#bb94ff;--app-soft:#2a1d40}
 :root[data-theme="dark"] .app.project{--app:#6fd39a;--app-soft:#143224}
+:root[data-theme="dark"] .app.study{--app:#5fd0e4;--app-soft:#0f2f36}
 
 .topbar{padding-block:14px}
 .theme-slot{margin-left:auto;display:flex}
@@ -127,6 +130,12 @@ footer a{color:var(--muted)}
       <h2><a href="https://petravanta.github.io/project-tracker/">Project Tracker</a></h2>
       <p>Plans a project as a Gantt chart with linked tasks that move when the work before them does, and tracks how much is done against the plan.</p>
       <div class="links"><span class="open" aria-hidden="true">Open →</span><a class="src" href="https://github.com/petravanta/project-tracker">Source</a></div>
+    </li>
+    <li class="app study">
+      <div class="icon"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="9" y="3" width="18" height="22" rx="3" fill="var(--app)" opacity=".45" transform="rotate(10 18 14)"/><rect x="5" y="7" width="18" height="22" rx="3" fill="var(--app)"/><path d="M9.5 18.5l3.5 3.5 6.5-7.5" fill="none" stroke="var(--ink)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <h2><a href="https://petravanta.github.io/study-buddy/">Study Buddy</a></h2>
+      <p>Prepares you for flash-card style knowledge tests like the U.S. citizenship civics test, with practice tests you set up and a history of every answer.</p>
+      <div class="links"><span class="open" aria-hidden="true">Open →</span><a class="src" href="https://github.com/petravanta/study-buddy">Source</a></div>
     </li>
   </ul>
 </main>
