@@ -1,6 +1,6 @@
 # Shared standards for petravanta's apps
 
-These apply to every app linked from the hub at **https://petravanta.github.io/general/**: [Fitness Coach](https://github.com/petravanta/fitness-coach), [Skating Mentor](https://github.com/petravanta/skating-mentor), [VoiceTrainer](https://github.com/petravanta/voicetrainer), [Nutrition Helper](https://github.com/petravanta/nutrition-helper), [Special Trip Planner](https://github.com/petravanta/special-trip-planner) and [Photo Timeline](https://github.com/petravanta/photo-timeline).
+These apply to every app linked from the hub at **https://petravanta.github.io/general/**: [Fitness Coach](https://github.com/petravanta/fitness-coach), [Skating Mentor](https://github.com/petravanta/skating-mentor), [VoiceTrainer](https://github.com/petravanta/voicetrainer), [Nutrition Helper](https://github.com/petravanta/nutrition-helper), [Special Trip Planner](https://github.com/petravanta/special-trip-planner), [Photo Timeline](https://github.com/petravanta/photo-timeline) and [Project Tracker](https://github.com/petravanta/project-tracker).
 
 ## Back link to the hub
 
@@ -107,7 +107,7 @@ When Drive and the browser (or an imported backup) disagree, nothing logged on e
 2. Any id in either `deleted` list is dropped, and the lists are joined.
 3. For each settings-like object, the newer `updatedAt` wins.
 
-Nutrition Helper follows these rules. Fitness Coach merges by id and `deleted` but does not stamp `u` yet, and neither app writes `version` yet; both should catch up when they next change their data.
+Nutrition Helper and Project Tracker follow these rules. Fitness Coach merges by id and `deleted` but does not stamp `u` yet, and neither app writes `version` yet; both should catch up when they next change their data.
 
 ### Sharing what you know, not who you are
 
@@ -198,7 +198,7 @@ Or by hand: in the repo, **Settings → Rules → Rulesets → New ruleset → I
 
 ## Shared look
 
-Fitness Coach, Skating Mentor, Nutrition Helper, Special Trip Planner and Photo Timeline (and the hub) share one set of colors, fonts and components. The canonical copy is [`shared/theme.css`](shared/theme.css). Each app inlines it between the `Shared look` and `end shared look` comments and only overrides the `--accent`, `--accent-ink` and `--accent-soft` values after it:
+Fitness Coach, Skating Mentor, Nutrition Helper, Special Trip Planner, Photo Timeline and Project Tracker (and the hub) share one set of colors, fonts and components. The canonical copy is [`shared/theme.css`](shared/theme.css). Each app inlines it between the `Shared look` and `end shared look` comments and only overrides the `--accent`, `--accent-ink` and `--accent-soft` values after it:
 
 | App | Light accent | Dark accent |
 | --- | --- | --- |
@@ -209,6 +209,7 @@ Fitness Coach, Skating Mentor, Nutrition Helper, Special Trip Planner and Photo 
 | Nutrition Helper | `#c2410c` orange | `#fb8a4c` |
 | Special Trip Planner | `#1d6fb8` blue | `#6cb4ff` |
 | Photo Timeline | `#7442b8` violet | `#bb94ff` |
+| Project Tracker | `#2e7d32` green | `#6fd39a` |
 
 VoiceTrainer has its own type and panel styles but follows the same token names for `--bg`, `--ink`, `--muted`, `--line` and `--accent`.
 
