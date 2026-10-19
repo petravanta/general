@@ -144,7 +144,7 @@ An app needs four things:
 
    It writes `icon.svg`, `icon-192.png` and `icon-512.png` (rounded), `icon-maskable-512.png` (full bleed, artwork inside the central 80% so Android can crop it to any shape) and `apple-touch-icon.png` (180 px, for iPhone).
 
-2. **A manifest**, `manifest.webmanifest`, with `name`, a short `short_name` for under the icon, `id`, `start_url` and `scope` all `./`, `display: standalone`, `background_color: #eef2f4`, `theme_color: #ffffff`, and the icons above (the 512 also listed as `maskable`). Copy one from an app that has it, such as Skating Mentor.
+2. **A manifest**, `manifest.webmanifest`, with `name`, a short `short_name` for under the icon, `id` set to the app's own path (`/<repo>/`), `start_url` and `scope` both `./`, `display: standalone`, `background_color: #eef2f4`, `theme_color: #ffffff`, and the icons above (the 512 also listed as `maskable`). Copy one from an app that has it, such as Skating Mentor. All the apps share one site, petravanta.github.io, and Chrome reads `id` against the site's root rather than the app's folder, so `"id": "./"` would make every app the same app (installing one shows the others as already installed). Always write the full path.
 
 3. **Tags in `<head>`**, next to the theme-color pair the theme switch already uses:
 

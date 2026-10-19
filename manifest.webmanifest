@@ -2,7 +2,7 @@
   "name": "Personal growth apps",
   "short_name": "My apps",
   "description": "One place to open Fitness Coach, Skating Mentor, VoiceTrainer and the rest of petravanta's apps.",
-  "id": "./",
+  "id": "/general/",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
