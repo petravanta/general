@@ -5,5 +5,6 @@
   { "id": "nutrition-helper", "name": "Nutrition Helper", "url": "https://petravanta.github.io/nutrition-helper/", "accent": "#c2410c", "accentDark": "#fb8a4c" },
   { "id": "special-trip-planner", "name": "Special Trip Planner", "url": "https://petravanta.github.io/special-trip-planner/", "accent": "#1d6fb8", "accentDark": "#6cb4ff" },
   { "id": "photo-timeline", "name": "Photo Timeline", "url": "https://petravanta.github.io/photo-timeline/", "accent": "#7442b8", "accentDark": "#bb94ff" },
-  { "id": "project-tracker", "name": "Project Tracker", "url": "https://petravanta.github.io/project-tracker/", "accent": "#2e7d32", "accentDark": "#6fd39a" }
+  { "id": "project-tracker", "name": "Project Tracker", "url": "https://petravanta.github.io/project-tracker/", "accent": "#2e7d32", "accentDark": "#6fd39a" },
+  { "id": "study-buddy", "name": "Study Buddy", "url": "https://petravanta.github.io/study-buddy/", "accent": "#0b7285", "accentDark": "#5fd0e4" }
 ]
