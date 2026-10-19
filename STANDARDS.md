@@ -80,6 +80,18 @@ Everything a person saves belongs to them: it stays in their browser and, if the
 - **Google Drive sync** is optional. Each app keeps one JSON file, `<App name> data.json`, in the user's own Drive, using the `drive.file` scope (the app sees only the file it created) and the shared OAuth client that allows `https://petravanta.github.io`. It saves a few seconds after each change, and merges with the browser copy on connect and whenever the app comes back into view.
 - **Export backup** downloads the whole document as JSON, and **Import backup** merges one back in. Imports from other apps (a Fitbod CSV, a MacroFactor export) are read in the browser and become ordinary records.
 
+### Staying connected to Google Drive
+
+These are static pages with no server, so Google gives them no refresh token: a Drive sign-in lasts an hour, and getting a new one opens Google's window, which browsers only allow right after a tap. That can't be made silent, but every app does the following so it is rare and costs at most one tap:
+
+- **One sign-in for all the apps.** They share an origin and an OAuth client, so a token from one works in all. `shared/google-token.js` (inline it, between its marker comments) keeps it under `localStorage` key `petravanta.google`, one per Google account, and tells open tabs when it changes. Reconnecting in one app reconnects every app on that browser, open tabs included.
+- **The account as a hint.** After connecting, the app remembers the account's email and passes it as `login_hint`, so Google's window closes by itself rather than asking which account. A first connect suggests the account the other apps already use.
+- **Renew on any tap.** Once the token has under ten minutes left, the next tap anywhere renews it. Load Google's script when the page opens, not on the tap, or the browser may block the window.
+- **Open without waiting for Google.** The app opens on the browser's copy and keeps saving changes there; the first tap after the hour reconnects, merges Drive's copy in, then writes. Never put a "Reconnect" screen in front of data the browser already has.
+- **Sign out forgets, doesn't revoke.** Signing out removes this browser's token. Revoking would cut off every app and every device that uses the same Google permission; people can remove it at myaccount.google.com/permissions.
+
+`shared/drive-store.js` does all of this for an app whose data is one JSON file (Fitness Coach and VoiceTrainer inline it). Skating Mentor, Nutrition Helper and Photo Timeline have their own Drive code and use `google-token.js` for the sign-in.
+
 ### Shape
 
 One JSON document per app:
