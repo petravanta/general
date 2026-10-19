@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Personal growth apps</title>
-<meta name="description" content="Personal growth apps: Fitness Coach, Skating Mentor, VoiceTrainer, Nutrition Helper, Special Trip Planner and Photo Timeline.">
+<meta name="description" content="Personal growth apps: Fitness Coach, Skating Mentor, VoiceTrainer, Nutrition Helper, Special Trip Planner, Photo Timeline and Project Tracker.">
 <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#172129" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="manifest.webmanifest">
@@ -26,19 +26,22 @@
 .app.nutrition{--app:#c2410c;--app-soft:#fde4d6}
 .app.trip{--app:#1d6fb8;--app-soft:#e0ecf8}
 .app.photo{--app:#7442b8;--app-soft:#efe6fa}
+.app.project{--app:#2e7d32;--app-soft:#dcefdc}
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]) .app.fitness{--app:#9d95ff;--app-soft:#25224d}
   :root:not([data-theme="light"]) .app.skating{--app:#f0679f;--app-soft:#3d1a2a}
   :root:not([data-theme="light"]) .app.voice{--app:#9aa6ff;--app-soft:#1e2447}
   :root:not([data-theme="light"]) .app.nutrition{--app:#fb8a4c;--app-soft:#3d2014}
   :root:not([data-theme="light"]) .app.trip{--app:#6cb4ff;--app-soft:#132a42}
-  :root:not([data-theme="light"]) .app.photo{--app:#bb94ff;--app-soft:#2a1d40}}
+  :root:not([data-theme="light"]) .app.photo{--app:#bb94ff;--app-soft:#2a1d40}
+  :root:not([data-theme="light"]) .app.project{--app:#6fd39a;--app-soft:#143224}}
 :root[data-theme="dark"] .app.fitness{--app:#9d95ff;--app-soft:#25224d}
 :root[data-theme="dark"] .app.skating{--app:#f0679f;--app-soft:#3d1a2a}
 :root[data-theme="dark"] .app.voice{--app:#9aa6ff;--app-soft:#1e2447}
 :root[data-theme="dark"] .app.nutrition{--app:#fb8a4c;--app-soft:#3d2014}
 :root[data-theme="dark"] .app.trip{--app:#6cb4ff;--app-soft:#132a42}
 :root[data-theme="dark"] .app.photo{--app:#bb94ff;--app-soft:#2a1d40}
+:root[data-theme="dark"] .app.project{--app:#6fd39a;--app-soft:#143224}
 
 .topbar{padding-block:14px}
 .theme-slot{margin-left:auto;display:flex}
@@ -118,6 +121,12 @@ footer a{color:var(--muted)}
       <h2><a href="https://petravanta.github.io/photo-timeline/">Photo Timeline</a></h2>
       <p>Lines your photos up by the date they were taken on one or more tracks, marks trips and special days, and saves the timeline as an image.</p>
       <div class="links"><span class="open" aria-hidden="true">Open →</span><a class="src" href="https://github.com/petravanta/photo-timeline">Source</a></div>
+    </li>
+    <li class="app project">
+      <div class="icon"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="3" y="5" width="13" height="6" rx="2" fill="var(--app)"/><rect x="11" y="13" width="15" height="6" rx="2" fill="var(--app)" opacity=".55"/><rect x="20" y="21" width="9" height="6" rx="2" fill="var(--ink)"/><path d="M16 8h2v8M26 16h-1v8" fill="none" stroke="var(--ink)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <h2><a href="https://petravanta.github.io/project-tracker/">Project Tracker</a></h2>
+      <p>Plans a project as a Gantt chart with linked tasks that move when the work before them does, and tracks how much is done against the plan.</p>
+      <div class="links"><span class="open" aria-hidden="true">Open →</span><a class="src" href="https://github.com/petravanta/project-tracker">Source</a></div>
     </li>
   </ul>
 </main>
