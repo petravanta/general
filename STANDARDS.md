@@ -1,6 +1,6 @@
 # Shared standards for petravanta's apps
 
-These apply to every app linked from the hub at **https://petravanta.github.io/general/**: [Fitness Coach](https://github.com/petravanta/fitness-coach), [Skating Mentor](https://github.com/petravanta/skating-mentor), [VoiceTrainer](https://github.com/petravanta/voicetrainer), [Nutrition Helper](https://github.com/petravanta/nutrition-helper), [Special Trip Planner](https://github.com/petravanta/special-trip-planner), [Photo Timeline](https://github.com/petravanta/photo-timeline), [Project Tracker](https://github.com/petravanta/project-tracker) and [Study Buddy](https://github.com/petravanta/study-buddy).
+These apply to every app linked from the hub at **https://petravanta.github.io/general/**: [Fitness Coach](https://github.com/petravanta/fitness-coach), [Skating Mentor](https://github.com/petravanta/skating-mentor), [VoiceTrainer](https://github.com/petravanta/voicetrainer), [Nutrition Helper](https://github.com/petravanta/nutrition-helper), [Special Trip Planner](https://github.com/petravanta/special-trip-planner), [Photo Timeline](https://github.com/petravanta/photo-timeline), [Project Tracker](https://github.com/petravanta/project-tracker), [Study Buddy](https://github.com/petravanta/study-buddy) and [Mind Palace](https://github.com/petravanta/mind-palace).
 
 ## Back link to the hub
 
@@ -90,7 +90,7 @@ These are static pages with no server, so Google gives them no refresh token: a 
 - **Open without waiting for Google.** The app opens on the browser's copy and keeps saving changes there; the first tap after the hour reconnects, merges Drive's copy in, then writes. Never put a "Reconnect" screen in front of data the browser already has.
 - **Sign out forgets, doesn't revoke.** Signing out removes this browser's token. Revoking would cut off every app and every device that uses the same Google permission; people can remove it at myaccount.google.com/permissions.
 
-`shared/drive-store.js` does all of this for an app whose data is one JSON file (Fitness Coach, VoiceTrainer and Study Buddy inline it). Skating Mentor, Nutrition Helper and Photo Timeline have their own Drive code and use `google-token.js` for the sign-in.
+`shared/drive-store.js` does all of this for an app whose data is one JSON file (Fitness Coach, VoiceTrainer, Study Buddy and Mind Palace inline it). Skating Mentor, Nutrition Helper and Photo Timeline have their own Drive code and use `google-token.js` for the sign-in.
 
 ### Shape
 
@@ -119,7 +119,7 @@ When Drive and the browser (or an imported backup) disagree, nothing logged on e
 2. Any id in either `deleted` list is dropped, and the lists are joined.
 3. For each settings-like object, the newer `updatedAt` wins.
 
-Nutrition Helper, Project Tracker and Study Buddy follow these rules. Fitness Coach merges by id and `deleted` but does not stamp `u` yet, and neither app writes `version` yet; both should catch up when they next change their data.
+Nutrition Helper, Project Tracker, Study Buddy and Mind Palace follow these rules. Fitness Coach merges by id and `deleted` but does not stamp `u` yet, and neither app writes `version` yet; both should catch up when they next change their data.
 
 ### Sharing what you know, not who you are
 
@@ -210,7 +210,7 @@ Or by hand: in the repo, **Settings → Rules → Rulesets → New ruleset → I
 
 ## Shared look
 
-Fitness Coach, Skating Mentor, Nutrition Helper, Special Trip Planner, Photo Timeline, Project Tracker and Study Buddy (and the hub) share one set of colors, fonts and components. The canonical copy is [`shared/theme.css`](shared/theme.css). Each app inlines it between the `Shared look` and `end shared look` comments and only overrides the `--accent`, `--accent-ink` and `--accent-soft` values after it:
+Fitness Coach, Skating Mentor, Nutrition Helper, Special Trip Planner, Photo Timeline, Project Tracker, Study Buddy and Mind Palace (and the hub) share one set of colors, fonts and components. The canonical copy is [`shared/theme.css`](shared/theme.css). Each app inlines it between the `Shared look` and `end shared look` comments and only overrides the `--accent`, `--accent-ink` and `--accent-soft` values after it:
 
 | App | Light accent | Dark accent |
 | --- | --- | --- |
@@ -223,6 +223,7 @@ Fitness Coach, Skating Mentor, Nutrition Helper, Special Trip Planner, Photo Tim
 | Photo Timeline | `#7442b8` violet | `#bb94ff` |
 | Project Tracker | `#2e7d32` green | `#6fd39a` |
 | Study Buddy | `#0b7285` cyan | `#5fd0e4` |
+| Mind Palace | `#9a6700` amber | `#f2c14e` |
 
 VoiceTrainer has its own type and panel styles but follows the same token names for `--bg`, `--ink`, `--muted`, `--line` and `--accent`.
 
