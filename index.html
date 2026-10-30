@@ -28,6 +28,7 @@
 .app.photo{--app:#7442b8;--app-soft:#efe6fa}
 .app.project{--app:#2e7d32;--app-soft:#dcefdc}
 .app.study{--app:#0b7285;--app-soft:#d7eef2}
+.app.mind{--app:#9a6700;--app-soft:#f6ecd2}
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]) .app.fitness{--app:#9d95ff;--app-soft:#25224d}
   :root:not([data-theme="light"]) .app.skating{--app:#f0679f;--app-soft:#3d1a2a}
@@ -36,7 +37,8 @@
   :root:not([data-theme="light"]) .app.trip{--app:#6cb4ff;--app-soft:#132a42}
   :root:not([data-theme="light"]) .app.photo{--app:#bb94ff;--app-soft:#2a1d40}
   :root:not([data-theme="light"]) .app.project{--app:#6fd39a;--app-soft:#143224}
-  :root:not([data-theme="light"]) .app.study{--app:#5fd0e4;--app-soft:#0f2f36}}
+  :root:not([data-theme="light"]) .app.study{--app:#5fd0e4;--app-soft:#0f2f36}
+  :root:not([data-theme="light"]) .app.mind{--app:#f2c14e;--app-soft:#33280f}}
 :root[data-theme="dark"] .app.fitness{--app:#9d95ff;--app-soft:#25224d}
 :root[data-theme="dark"] .app.skating{--app:#f0679f;--app-soft:#3d1a2a}
 :root[data-theme="dark"] .app.voice{--app:#9aa6ff;--app-soft:#1e2447}
@@ -45,6 +47,7 @@
 :root[data-theme="dark"] .app.photo{--app:#bb94ff;--app-soft:#2a1d40}
 :root[data-theme="dark"] .app.project{--app:#6fd39a;--app-soft:#143224}
 :root[data-theme="dark"] .app.study{--app:#5fd0e4;--app-soft:#0f2f36}
+:root[data-theme="dark"] .app.mind{--app:#f2c14e;--app-soft:#33280f}
 
 .topbar{padding-block:14px}
 .theme-slot{margin-left:auto;display:flex}
@@ -136,6 +139,12 @@ footer a{color:var(--muted)}
       <h2><a href="https://petravanta.github.io/study-buddy/">Study Buddy</a></h2>
       <p>Prepares you for flash-card style knowledge tests like the U.S. citizenship civics test, with practice tests you set up and a history of every answer.</p>
       <div class="links"><span class="open" aria-hidden="true">Open →</span><a class="src" href="https://github.com/petravanta/study-buddy">Source</a></div>
+    </li>
+    <li class="app mind">
+      <div class="icon"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 16L6 8M16 16L6 24M16 16L26 9M16 16L26 23" stroke="var(--app)" stroke-width="2.2" stroke-linecap="round"/><circle cx="16" cy="16" r="6" fill="var(--ink)"/><circle cx="5.5" cy="7.5" r="3.5" fill="var(--app)"/><circle cx="5.5" cy="24.5" r="3.5" fill="var(--app)"/><circle cx="26.5" cy="8.5" r="3.5" fill="var(--app)"/><circle cx="26.5" cy="23.5" r="3.5" fill="var(--app)"/></svg></div>
+      <h2><a href="https://petravanta.github.io/mind-palace/">Mind Palace</a></h2>
+      <p>Mind maps you arrange by dragging ideas around, with an outline of the same map beside it that you can edit, reorder and indent.</p>
+      <div class="links"><span class="open" aria-hidden="true">Open →</span><a class="src" href="https://github.com/petravanta/mind-palace">Source</a></div>
     </li>
   </ul>
 </main>
