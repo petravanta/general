@@ -26,7 +26,7 @@ Add two things to the app's HTML:
 
 1. Publish it on GitHub Pages under `petravanta.github.io/<repo>/`.
 2. Add the back link (above), the theme switch (below) and the install files (*Installing on a phone*), follow *Built-in knowledge* for its content, and *User data* for what people save.
-3. Apply the *Protect main* ruleset: `./github/apply-ruleset.sh <repo>`.
+3. Apply the *Protect main* ruleset and the repo settings for *Merging pull requests*: `./github/apply-ruleset.sh <repo>`.
 4. Add a card for it to [`index.html`](index.html): copy an existing `<li class="app …">`, set its name, link, one-line description and icon, and add a `--app` / `--app-soft` accent pair (light and dark) in the `<style>` block. Also add the app to [`shared/apps.json`](shared/apps.json) (id, name, url and the same light and dark accents) so it shows in every app's menu, and add the repo to `repos` in `github/apply-ruleset.sh`.
 
 ## Light and dark themes
@@ -195,11 +195,26 @@ All apps and the hub follow this. Fitness Coach and Nutrition Helper have their 
 
 Each app has an `AGENTS.md` that links back here and lists only what's specific to that app, plus a one-line `CLAUDE.md` containing `@AGENTS.md` so Claude Code reads the same notes.
 
+When an agent opens a pull request, it turns on auto-merge (squash) in the same step, as *Merging pull requests* describes, unless the PR needs petravanta's decision, in which case it opens a draft and says what needs deciding.
+
+## Merging pull requests
+
+Pull requests merge automatically by default. Nobody needs to press **Merge** on routine work.
+
+- **Small, confident changes** can still go straight to `main`.
+- **Everything else goes through a pull request that merges itself** once its checks pass (for example *Check data*). The person or agent who opens it turns on auto-merge with **squash** straight away (`gh pr merge --auto --squash`, or **Enable auto-merge** on the PR page). If the repo has no checks yet, it merges at once.
+- **Hold one back on purpose.** A PR that needs petravanta's decision (a change of direction, something hard to undo, a design choice between options) is opened as a **draft**, or without auto-merge, and its description says what needs deciding. Turning auto-merge off on an open PR also holds it.
+- **Only our own PRs.** Auto-merge is for PRs opened by petravanta or their coding agents. A PR from anyone else (say, someone proposing a new exercise in `data/`) waits for a review.
+- **A failing check stops the merge.** Fix it on the branch and the PR merges when it goes green. Never skip or remove a check to get it through.
+- Merges are squashed into one commit titled after the PR, and the branch is deleted afterwards.
+
+Each repo needs **Allow auto-merge** switched on for this. [`github/repo-settings.json`](github/repo-settings.json) holds the settings (auto-merge, squash merges, delete branches after merge, offer to update a branch) and `./github/apply-ruleset.sh` applies them together with the *Protect main* ruleset below. By hand: **Settings → General → Pull Requests**, tick *Allow auto-merge*, *Allow squash merging* and *Automatically delete head branches*.
+
 ## Protecting `main`
 
 Every repo should have a ruleset called **Protect main** on its default branch that blocks force pushes and deleting the branch. Normal pushes and pull request merges work as before. The rule is [`github/main-branch-ruleset.json`](github/main-branch-ruleset.json).
 
-To apply it, or roll out a change to it, run this once on your own machine with the [GitHub CLI](https://cli.github.com/) signed in (`gh auth login`):
+To apply it, or roll out a change to it, run this once (it also applies the settings from *Merging pull requests*) on your own machine with the [GitHub CLI](https://cli.github.com/) signed in (`gh auth login`):
 
 ```sh
 ./github/apply-ruleset.sh                # the hub and every app
