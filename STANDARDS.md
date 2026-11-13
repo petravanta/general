@@ -226,7 +226,7 @@ Or by hand: in the repo, **Settings → Rules → Rulesets → New ruleset → I
 
 ## Backups
 
-Every petravanta repo has a full local copy, so losing GitHub access (as happened in November 2026) never means losing the code or its history. GitHub stays the place we work; the copies are only for getting back on our feet. We don't add another hosting service for this.
+Good storage means more than one copy. Every petravanta repo is kept in at least two independent places: GitHub, where we work, and a full local mirror, with an optional third copy on a separate drive. Each copy holds the whole history, and we test restoring from them, so no single place is the only home of the code. We keep the extra copies on our own drives rather than adding another hosting service.
 
 ### What gets copied
 
