@@ -27,7 +27,7 @@ Add two things to the app's HTML:
 1. Publish it on GitHub Pages under `petravanta.github.io/<repo>/`.
 2. Add the back link (above), the theme switch (below) and the install files (*Installing on a phone*), follow *Built-in knowledge* for its content, and *User data* for what people save.
 3. Apply the *Protect main* ruleset and the repo settings for *Merging pull requests*: `./github/apply-ruleset.sh <repo>`.
-4. Back it up: run `.\github\backup-repos.ps1 <repo>` (or `./github/backup-repos.sh <repo>`) once so its mirror exists from day one (*Backups*). After that the regular run picks it up by itself, because the script backs up every repo petravanta owns.
+4. Back it up: run `.\github\backup-repos.ps1 <repo>` (or `./github/backup-repos.sh <repo>`) once so its mirror exists from day one (*Backups*). After that the regular run picks it up by itself, because the script backs up every repo petravanta owns. Keep its working clone under `F:\Dev\petravantaapps` so `sync-all` checks it too (*Syncing every project*).
 5. Add a card for it to [`index.html`](index.html): copy an existing `<li class="app …">`, set its name, link, one-line description and icon, and add a `--app` / `--app-soft` accent pair (light and dark) in the `<style>` block. Also add the app to [`shared/apps.json`](shared/apps.json) (id, name, url and the same light and dark accents) so it shows in every app's menu, and add the repo to `repos` in `github/apply-ruleset.sh`.
 
 ## Light and dark themes
@@ -287,6 +287,37 @@ git -C $env:TEMP\restore-test log --oneline -3   # matches the latest work on Gi
 ```
 
 Open its `index.html` to see the app load, then delete the folder. If you keep bundles, test one of those too (`git clone <repo>.bundle`). `-Verify` checks every mirror is whole in between.
+
+## Syncing every project
+
+Work can sit on one machine for a while: a branch never pushed, a commit waiting on `main`, a pushed branch nobody opened a pull request for. [`github/sync-all.ps1`](github/sync-all.ps1) (Windows) and [`github/sync-all.sh`](github/sync-all.sh) (Git Bash, macOS, Linux) check every project in one go: they run the backups above, then look at every clone under `F:\Dev\petravantaapps` (any folder up to three levels down) and report what hasn't reached GitHub.
+
+```powershell
+.\github\sync-all.ps1                   # back up, then report: changes nothing in your files or branches
+.\github\sync-all.ps1 -Push             # also push branches with commits GitHub doesn't have
+.\github\sync-all.ps1 -Push -OpenPRs    # ...and open pull requests for branches that have none
+.\github\sync-all.ps1 -SkipBackup       # report from what's on disk, without touching GitHub
+```
+
+The report lists, per clone: uncommitted or untracked files, stashes, branches with commits GitHub doesn't have, branches that were never pushed, branches that differ both ways (pull first), local branches already merged (safe to delete), and branches on GitHub that are ahead of `main` with no pull request. It ends with a **Needs you** list and is saved to `_backups\sync-report.txt`.
+
+What it will and won't do:
+
+- **Report-only by default.** `-Push` pushes branches, `-OpenPRs` opens pull requests; nothing else changes. It never commits for you, never pushes `main` (it tells you instead), never force-pushes and never pushes a branch that has diverged.
+- **Pull requests it opens are yours to merge.** It doesn't turn on auto-merge, and it never touches pull requests from other people.
+- **It reads, rather than asks.** The fresh mirrors already hold every branch and every pull request's head (`refs/pull/N/head`), so the clones are compared against them on disk. Apart from the backup, the only calls to GitHub are the pushes and pull requests themselves.
+
+### Good-citizen rate limiting
+
+Bulk activity from one account across many repos can look like a misbehaving bot, so sync-all paces itself like a careful person would. These limits are on by default; please keep them:
+
+- **One repo at a time**, never in parallel, with a **random 5 to 15 second pause** before every call to GitHub (the backup step pauses between repos too). `-Delay 10-30` slows it further.
+- **Small caps per run:** at most **5 pushes** (`-MaxPushes`) and **2 new pull requests** (`-MaxPRs`). Anything over a cap is listed under **Next run** and picked up then.
+- **A minimum gap between runs** of 60 minutes (`-MinInterval`), recorded in `_backups\sync-state.txt`. A run started too soon stops before doing anything. `-SkipBackup` reports never count, because they don't touch GitHub.
+- **A full stop on any refusal.** If GitHub answers 403, 429 or asks us to slow down, the run stops at once, doesn't retry, and the next runs wait out a cool-down: 6 hours, doubling after each further refusal up to 48 hours, back to normal after a clean run. Only a plain network hiccup is retried, twice, after 30 and then 60 seconds.
+- **Plain git first.** Pushes are plain `git push`; the backups are `git fetch`; the GitHub API is used once to list the repos and once per new pull request.
+
+Run it by hand once a week or after a burst of work. The scheduled weekly backup above can stay as it is, or point it at `sync-all.ps1` (report-only) instead of `backup-repos.ps1` to get the report too.
 
 ## Shared look
 
