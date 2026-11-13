@@ -27,7 +27,8 @@ Add two things to the app's HTML:
 1. Publish it on GitHub Pages under `petravanta.github.io/<repo>/`.
 2. Add the back link (above), the theme switch (below) and the install files (*Installing on a phone*), follow *Built-in knowledge* for its content, and *User data* for what people save.
 3. Apply the *Protect main* ruleset and the repo settings for *Merging pull requests*: `./github/apply-ruleset.sh <repo>`.
-4. Add a card for it to [`index.html`](index.html): copy an existing `<li class="app …">`, set its name, link, one-line description and icon, and add a `--app` / `--app-soft` accent pair (light and dark) in the `<style>` block. Also add the app to [`shared/apps.json`](shared/apps.json) (id, name, url and the same light and dark accents) so it shows in every app's menu, and add the repo to `repos` in `github/apply-ruleset.sh`.
+4. Back it up: run `.\github\backup-repos.ps1 <repo>` (or `./github/backup-repos.sh <repo>`) once so its mirror exists from day one (*Backups*). After that the regular run picks it up by itself, because the script backs up every repo petravanta owns.
+5. Add a card for it to [`index.html`](index.html): copy an existing `<li class="app …">`, set its name, link, one-line description and icon, and add a `--app` / `--app-soft` accent pair (light and dark) in the `<style>` block. Also add the app to [`shared/apps.json`](shared/apps.json) (id, name, url and the same light and dark accents) so it shows in every app's menu, and add the repo to `repos` in `github/apply-ruleset.sh`.
 
 ## Light and dark themes
 
@@ -222,6 +223,70 @@ To apply it, or roll out a change to it, run this once (it also applies the sett
 ```
 
 Or by hand: in the repo, **Settings → Rules → Rulesets → New ruleset → Import a ruleset**, and pick `github/main-branch-ruleset.json`.
+
+## Backups
+
+Every petravanta repo has a full local copy, so losing GitHub access (as happened in November 2026) never means losing the code or its history. GitHub stays the place we work; the copies are only for getting back on our feet. We don't add another hosting service for this.
+
+### What gets copied
+
+- **Each repo, as a mirror:** `F:\Dev\petravantaapps\_backups\<repo>.git`, made with `git clone --mirror`, so it holds every branch and tag, not just `main`. A mirror is a bare repo: there are no working files to edit in it, which also keeps it from being changed by accident.
+- **The repo list:** `_backups\repos.json` records each repo's description, visibility, home page and default branch, which aren't in git.
+- **Settings are already in git:** [`github/repo-settings.json`](github/repo-settings.json) and [`github/main-branch-ruleset.json`](github/main-branch-ruleset.json) come back with the hub's mirror. GitHub Pages is the one setting not in a file: every repo publishes from `main`, root folder, except VoiceTrainer, which deploys with GitHub Actions.
+- **People's data is not in the repos** (*User data*). It lives in each person's browser and their own Google Drive (`<App name> data.json`), and **Export backup** in each app saves a copy. The repo backups don't cover it and don't need to.
+
+### Keeping it fresh
+
+[`github/backup-repos.ps1`](github/backup-repos.ps1) (Windows) and [`github/backup-repos.sh`](github/backup-repos.sh) (Git Bash, macOS, Linux) do the same thing: list petravanta's repos, clone a mirror of any new one and refresh the rest. Run them on your own machine with the [GitHub CLI](https://cli.github.com/) signed in.
+
+```powershell
+.\github\backup-repos.ps1                 # every repo
+.\github\backup-repos.ps1 -DryRun         # show what would happen, change nothing
+.\github\backup-repos.ps1 -Verify         # also check every mirror is whole
+.\github\backup-repos.ps1 mind-palace     # just one
+```
+
+They are gentle on GitHub on purpose: **one** API call to list the repos, then plain `git fetch` one repo at a time, and a repo with nothing new downloads nothing. Please don't run them in a tight loop or in parallel.
+
+- **When:** once a week on a schedule, and by hand after a big change (a merge you'd hate to redo, a new app). To schedule the weekly run in Windows (Sunday evening):
+  ```powershell
+  schtasks /Create /TN "petravanta backups" /SC WEEKLY /D SUN /ST 19:00 /TR "powershell -NoProfile -ExecutionPolicy Bypass -File F:\Dev\petravantaapps\general\github\backup-repos.ps1"
+  ```
+  This assumes a working clone of this repo at `F:\Dev\petravantaapps\general`; adjust the path if yours lives elsewhere.
+- **New apps** are picked up by the next run with nothing to configure. Step 4 of *Adding a new app* runs it once straight away.
+
+### A second copy (recommended)
+
+One copy on one drive is one failure away from none. We recommend, but don't require, a second copy somewhere else: an external drive, or a folder in your Google Drive. Use `-Bundle` (or `--bundle`) to write one `<repo>.bundle` file per repo there; a bundle is a single file holding the whole repo with all its branches, so it copies and syncs cleanly.
+
+```powershell
+.\github\backup-repos.ps1 -Bundle "G:\My Drive\Backups\repos"
+```
+
+### Restoring
+
+From a mirror, or a bundle, to a new empty repo (on GitHub or anywhere else):
+
+```sh
+git -C F:/Dev/petravantaapps/_backups/<repo>.git push --mirror https://github.com/petravanta/<repo>.git
+# or from a bundle:
+git clone --mirror <repo>.bundle <repo>.git && git -C <repo>.git push --mirror <new remote url>
+```
+
+`--mirror` sends every branch and tag and makes the remote match the copy exactly, so only push it to a new or empty repo. Then re-apply the settings (`./github/apply-ruleset.sh <repo>`), turn Pages back on (see *What gets copied*) and add the repo's description from `repos.json`.
+
+To just get working files back on your machine, `git clone F:/Dev/petravantaapps/_backups/<repo>.git <folder>`.
+
+### Testing a restore
+
+A backup we've never restored is a hope, not a backup. Every three months or so, pick one repo and check:
+
+```powershell
+git clone F:\Dev\petravantaapps\_backups\<repo>.git $env:TEMP\restore-test
+git -C $env:TEMP\restore-test log --oneline -3   # matches the latest work on GitHub?
+```
+
+Open its `index.html` to see the app load, then delete the folder. If you keep bundles, test one of those too (`git clone <repo>.bundle`). `-Verify` checks every mirror is whole in between.
 
 ## Shared look
 
