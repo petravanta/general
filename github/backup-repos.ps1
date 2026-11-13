@@ -7,18 +7,21 @@ Run it on your own machine with the GitHub CLI signed in (gh auth login) and git
   .\github\backup-repos.ps1 -Bundle G:\backups       # also write one <repo>.bundle per repo there (the second copy)
   .\github\backup-repos.ps1 -Verify                  # also check each mirror is whole (git fsck)
   .\github\backup-repos.ps1 general,voicetrainer     # only the repos you name
+  .\github\backup-repos.ps1 -Delay 5-15              # wait a random 5-15 s between repos (sync-all.ps1 does this)
 
 Mirrors go to -Dest (default F:\Dev\petravantaapps\_backups).
 
 Gentle on GitHub: one API call lists the repos; everything else is plain git fetch, one repo at a time,
-and a repo with nothing new downloads nothing.
+and a repo with nothing new downloads nothing. If GitHub answers 403/429 or asks us to slow down, it stops at once
+without retrying and exits with 2.
 #>
 param(
   [string[]]$Repos = @(),
   [string]$Dest = 'F:\Dev\petravantaapps\_backups',
   [string]$Bundle = '',
   [switch]$DryRun,
-  [switch]$Verify
+  [switch]$Verify,
+  [string]$Delay = '0-0'
 )
 $ErrorActionPreference = 'Stop'
 $owner = 'petravanta'
@@ -29,9 +32,35 @@ function Invoke-Step([string]$exe, [string[]]$argv) {
   return ($LASTEXITCODE -eq 0)
 }
 
+$limitRe = 'HTTP 403|HTTP 429|403 Forbidden|429 Too Many|rate limit|abuse|secondary rate|too many requests|slow down'
+$delayLo, $delayHi = $Delay -split '-' | ForEach-Object { [int]$_ }
+$script:fetched = 0
+# A git command that talks to GitHub: pause between repos, stop dead on a limit.
+function Invoke-GitHub([string[]]$argv) {
+  if ($DryRun) { Write-Host "  would run: git $($argv -join ' ')"; return $true }
+  if ($script:fetched -gt 0 -and $delayHi -gt 0) { Start-Sleep -Seconds (Get-Random -Minimum $delayLo -Maximum ($delayHi + 1)) }
+  $script:fetched++
+  $ErrorActionPreference = 'Continue'   # git writes progress to stderr
+  $out = (& git @argv 2>&1 | ForEach-Object { "$_" }) -join "`n"
+  $rc = $LASTEXITCODE
+  if ($out) { Write-Host $out }
+  if ($rc -ne 0 -and $out -match $limitRe) {
+    Write-Host 'STOPPED: GitHub answered with a limit or a refusal. Not retrying; try again in a few hours.'; exit 2
+  }
+  return ($rc -eq 0)
+}
+
 # The one API call. Its output is also kept as repos.json (description, visibility, homepage, default branch).
-$json = gh repo list $owner --limit 500 --json name,description,visibility,homepageUrl,defaultBranchRef,isArchived,isFork,pushedAt
-if ($LASTEXITCODE -ne 0 -or -not $json) { throw "No repos listed for $owner. Is gh signed in?" }
+$errFile = [IO.Path]::GetTempFileName()
+$ErrorActionPreference = 'Continue'
+$json = gh repo list $owner --limit 500 --json name,description,visibility,homepageUrl,defaultBranchRef,isArchived,isFork,pushedAt 2>$errFile
+$listed = ($LASTEXITCODE -eq 0 -and $json)
+$ErrorActionPreference = 'Stop'
+if (-not $listed) {
+  $err = Get-Content -Raw $errFile; Write-Host $err
+  if ($err -match $limitRe) { Write-Host 'STOPPED: GitHub answered with a limit. Not retrying.'; exit 2 }
+  throw "No repos listed for $owner. Is gh signed in?"
+}
 $list = $json | ConvertFrom-Json
 
 if (-not $DryRun) {
@@ -47,10 +76,10 @@ foreach ($r in $list) {
   $mirror = Join-Path $Dest "$name.git"
   if (Test-Path $mirror) {
     Write-Host "refresh $name"
-    $ok = Invoke-Step git @('-C', $mirror, 'remote', 'update', '--prune')
+    $ok = Invoke-GitHub @('-C', $mirror, 'remote', 'update', '--prune')
   } else {
     Write-Host "mirror  $name (new)"
-    $ok = Invoke-Step git @('clone', '--quiet', '--mirror', "https://github.com/$owner/$name.git", $mirror)
+    $ok = Invoke-GitHub @('clone', '--quiet', '--mirror', "https://github.com/$owner/$name.git", $mirror)
   }
   if (-not $ok) { Write-Warning "FAILED $name"; $failed = $true; continue }
   if ($Verify -and -not (Invoke-Step git @('-C', $mirror, 'fsck', '--connectivity-only', '--no-progress'))) {
