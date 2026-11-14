@@ -66,8 +66,11 @@ if (-not $SkipBackup) {
     Write-Host "Last run was $([int](($now - $state.last_run) / 60)) min ago; the minimum gap is $MinInterval min. Try after $(When ($state.last_run + $MinInterval * 60)), or use -SkipBackup."
     exit 3
   }
-  $state.last_run = $now; Save-State
 }
+# Only a run that finishes its backup counts as a run (last_run is written at the end). If one is cut short,
+# a retry carries on: repos refreshed in the last 6 hours are listed in the progress file and skipped.
+$progressFile = Join-Path $Dest 'sync-progress.txt'
+if ((Test-Path $progressFile) -and (Get-Item $progressFile).LastWriteTime -lt (Get-Date).AddHours(-6)) { Remove-Item $progressFile }
 
 # --- Talking to GitHub ------------------------------------------------------------------------------
 $limitRe = 'HTTP 403|HTTP 429|403 Forbidden|429 Too Many|rate limit|abuse|secondary rate|too many requests|slow down'
@@ -107,12 +110,15 @@ if (-not $SkipBackup) {
   Say '== Backups'
   # Its own process, so its exit code (2 = GitHub said stop) comes back cleanly.
   $ps = (Get-Process -Id $PID).Path
-  & $ps -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'backup-repos.ps1') -Dest $Dest -Delay $Delay 2>&1 |
+  & $ps -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'backup-repos.ps1') -Dest $Dest -Delay $Delay -Progress $progressFile 2>&1 |
     ForEach-Object { Say "$_" }
   $rc = $LASTEXITCODE
   if ($rc -eq 2) { Stop-ForGitHub }
-  if ($rc -eq 0) { $fresh = $true; $state.strikes = 0; Save-State }
-  else { Say 'Backups had problems (see above). Still checking the clones, using what they last fetched.' }
+  if ($rc -eq 0) { $fresh = $true; $state.strikes = 0; Remove-Item $progressFile -ErrorAction SilentlyContinue }
+  else {
+    Say 'Backups had problems (see above). Still checking the clones, using what they last fetched.'
+    Say "This doesn't count as a run, so you can retry straight away; repos already refreshed are skipped."
+  }
   Say ''
 }
 
@@ -236,7 +242,7 @@ Say ''
 Say "== Summary: $found clone(s) checked, $($script:pushes) push(es), $($script:prs) PR(s) opened, $($script:calls) GitHub call(s) after the backup"
 if ($needs.Count) { Say 'Needs you:'; $needs | ForEach-Object { Say "  - $_" } } else { Say 'Everything local is on GitHub.' }
 if ($later.Count) { Say "Next run (over this run's caps):"; $later | ForEach-Object { Say "  - $_" } }
-if (-not $SkipBackup) { Save-State }
+if ($fresh) { $state.last_run = Now; Save-State }
 Save-Report
 Write-Host "(Saved to $reportFile)"
 exit 0
