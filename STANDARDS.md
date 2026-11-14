@@ -2,6 +2,8 @@
 
 These apply to every app linked from the hub at **https://petravanta.github.io/general/**: [Fitness Coach](https://github.com/petravanta/fitness-coach), [Skating Mentor](https://github.com/petravanta/skating-mentor), [VoiceTrainer](https://github.com/petravanta/voicetrainer), [Nutrition Helper](https://github.com/petravanta/nutrition-helper), [Special Trip Planner](https://github.com/petravanta/special-trip-planner), [Photo Timeline](https://github.com/petravanta/photo-timeline), [Project Tracker](https://github.com/petravanta/project-tracker), [Study Buddy](https://github.com/petravanta/study-buddy), [Mind Palace](https://github.com/petravanta/mind-palace), [Dance Floor](https://github.com/petravanta/dance-floor) and [Wardrobe](https://github.com/petravanta/wardrobe).
 
+[`CHECKLIST.md`](CHECKLIST.md) lists every concern below as one row each (what, for which repos, how it's checked), and *Checking every project* explains the script that checks them all.
+
 ## Back link to the hub
 
 Every app shows an **All apps** link to the hub in its header, at the start of the brand row, before the app name.
@@ -30,6 +32,7 @@ Add two things to the app's HTML:
 4. Add the MIT licence: copy [`LICENSE`](LICENSE) into the repo root as is (see *License*).
 5. Back it up: run `.\github\backup-repos.ps1 <repo>` (or `./github/backup-repos.sh <repo>`) once so its mirror exists from day one (*Backups*). After that the regular run picks it up by itself, because the script backs up every repo petravanta owns. Keep its working clone under `F:\Dev\petravantaapps` so `sync-all` checks it too (*Syncing every project*).
 6. Add a card for it to [`index.html`](index.html): copy an existing `<li class="app …">`, set its name, link, one-line description and icon, and add a `--app` / `--app-soft` accent pair (light and dark) in the `<style>` block. Also add the app to [`shared/apps.json`](shared/apps.json) (id, name, url and the same light and dark accents) so it shows in every app's menu, and add the repo to the repo list in `github/apply-ruleset.ps1` and `github/apply-ruleset.sh`.
+7. Check it: `.\github\standards.ps1 <repo>` (or `./github/standards.sh <repo>`) should report no gaps (*Checking every project*).
 
 ## License
 
@@ -334,6 +337,37 @@ Bulk activity from one account across many repos can look like a misbehaving bot
 - **Plain git first.** Pushes are plain `git push`; the backups are `git fetch`; the GitHub API is used once to list the repos and once per new pull request.
 
 Run it by hand once a week or after a burst of work. The scheduled weekly backup above can stay as it is, or point it at `sync-all.ps1` (report-only) instead of `backup-repos.ps1` to get the report too.
+
+## Checking every project
+
+[`CHECKLIST.md`](CHECKLIST.md) is the list of everything a project built on these standards has to cover, from the licence to the theme switch to the *Protect main* ruleset. [`github/standards.ps1`](github/standards.ps1) (Windows) and [`github/standards.sh`](github/standards.sh) (Git Bash, Linux; needs bash 4) read that list and check every repo against it, so bringing the apps in line is one command rather than a dozen repo-by-repo chores.
+
+```powershell
+.\github\standards.ps1                           # report for the hub and every app; changes nothing
+.\github\standards.ps1 wardrobe                  # just one repo
+.\github\standards.ps1 -Only auto-merge,license  # just some rows of the checklist
+.\github\standards.ps1 -Offline                  # file checks only, no GitHub calls at all
+.\github\standards.ps1 -Apply                    # also fix what can safely be fixed
+```
+
+The report lists, per repo, each row it doesn't meet yet (`GAP` for a *must*, `should` for a recommendation), then **By concern**: for each row, the repos that still miss it, which is the to-do list for a bulk change. Rows marked `manual` (a desktop check, say) are named once at the end. It is saved to `_backups\standards-report.txt`.
+
+How it checks:
+
+- **Files** (the licence, `AGENTS.md`, the hub link, the manifest) are read from the backup mirrors in `_backups`, so they cost GitHub nothing. Refresh the mirrors first (`sync-all` or `backup-repos`) to check today's state; a repo with no mirror yet is skipped and listed under **Needs you**.
+- **Settings** (*Allow auto-merge*, squash, delete branches, the *Protect main* ruleset, Pages) are read from GitHub: two calls per repo, with a 2 to 5 second pause between them.
+- **The hub's own lists** (the card on `index.html`, `shared/apps.json`, the `apply-ruleset` repo lists) are read from this clone of general.
+
+What `-Apply` (`--apply`) does, and nothing more:
+
+- **Repo settings and the ruleset:** runs `apply-ruleset` for repos that miss them (at most 5 repos per run, `-MaxSettings`).
+- **Backups:** makes the first mirror for a repo that has none.
+- **File fixes:** for the rows whose *Fix* column names one (the MIT `LICENSE`, the README *License* section, `CLAUDE.md`, a starter `AGENTS.md`, the manifest `id`), it makes the change in a scratch clone of the mirror, pushes one branch per repo (`standards/<date>`), opens **one small pull request** and turns on auto-merge (squash), as *Merging pull requests* describes. At most **2 pull requests per run** (`-MaxPRs`); the rest wait for the next run. A repo whose earlier `standards/…` branch is still open is skipped until that one is merged.
+- Everything else (the theme switch, the shared look, Drive sign-in) needs a person or an agent working in that app, so it stays in the report.
+
+It keeps the same manners as *Syncing every project*: one repo at a time, a random 5 to 15 second pause before every write, at least 60 minutes between `-Apply` runs (`-MinInterval`), and a full stop on any 403 or 429 that also starts sync-all's cool-down (they share `_backups\sync-state.txt`).
+
+To add a standard, add its section here and its row to `CHECKLIST.md` in the same change. The *Check* column is a tiny language the scripts read: `file A,B` (any of these paths exists), `grep REGEX` (the app's own `.html`, `.js`, `.css` and manifest files match), `grep:PATHS REGEX` (these files or folders match), `hub-file` and `hub-grep:PATH` (the same, in general), `setting NAME` (a GitHub repo setting is true), `ruleset NAME`, `pages`, `mirror`, `clone` and `manual`. `{repo}` stands for the repo's name. A new automatic fix needs code in both scripts; a new check usually doesn't.
 
 ## Shared look
 
