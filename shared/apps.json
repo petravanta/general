@@ -7,5 +7,6 @@
   { "id": "photo-timeline", "name": "Photo Timeline", "url": "https://petravanta.github.io/photo-timeline/", "accent": "#7442b8", "accentDark": "#bb94ff" },
   { "id": "project-tracker", "name": "Project Tracker", "url": "https://petravanta.github.io/project-tracker/", "accent": "#2e7d32", "accentDark": "#6fd39a" },
   { "id": "study-buddy", "name": "Study Buddy", "url": "https://petravanta.github.io/study-buddy/", "accent": "#0b7285", "accentDark": "#5fd0e4" },
-  { "id": "mind-palace", "name": "Mind Palace", "url": "https://petravanta.github.io/mind-palace/", "accent": "#9a6700", "accentDark": "#f2c14e" }
+  { "id": "mind-palace", "name": "Mind Palace", "url": "https://petravanta.github.io/mind-palace/", "accent": "#9a6700", "accentDark": "#f2c14e" },
+  { "id": "dance-floor", "name": "Dance Floor", "url": "https://petravanta.github.io/dance-floor/", "accent": "#a21caf", "accentDark": "#e879f9" }
 ]

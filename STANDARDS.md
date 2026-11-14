@@ -1,6 +1,6 @@
 # Shared standards for petravanta's apps
 
-These apply to every app linked from the hub at **https://petravanta.github.io/general/**: [Fitness Coach](https://github.com/petravanta/fitness-coach), [Skating Mentor](https://github.com/petravanta/skating-mentor), [VoiceTrainer](https://github.com/petravanta/voicetrainer), [Nutrition Helper](https://github.com/petravanta/nutrition-helper), [Special Trip Planner](https://github.com/petravanta/special-trip-planner), [Photo Timeline](https://github.com/petravanta/photo-timeline), [Project Tracker](https://github.com/petravanta/project-tracker), [Study Buddy](https://github.com/petravanta/study-buddy) and [Mind Palace](https://github.com/petravanta/mind-palace).
+These apply to every app linked from the hub at **https://petravanta.github.io/general/**: [Fitness Coach](https://github.com/petravanta/fitness-coach), [Skating Mentor](https://github.com/petravanta/skating-mentor), [VoiceTrainer](https://github.com/petravanta/voicetrainer), [Nutrition Helper](https://github.com/petravanta/nutrition-helper), [Special Trip Planner](https://github.com/petravanta/special-trip-planner), [Photo Timeline](https://github.com/petravanta/photo-timeline), [Project Tracker](https://github.com/petravanta/project-tracker), [Study Buddy](https://github.com/petravanta/study-buddy), [Mind Palace](https://github.com/petravanta/mind-palace) and [Dance Floor](https://github.com/petravanta/dance-floor).
 
 ## Back link to the hub
 
@@ -331,7 +331,7 @@ Run it by hand once a week or after a burst of work. The scheduled weekly backup
 
 ## Shared look
 
-Fitness Coach, Skating Mentor, Nutrition Helper, Special Trip Planner, Photo Timeline, Project Tracker, Study Buddy and Mind Palace (and the hub) share one set of colors, fonts and components. The canonical copy is [`shared/theme.css`](shared/theme.css). Each app inlines it between the `Shared look` and `end shared look` comments and only overrides the `--accent`, `--accent-ink` and `--accent-soft` values after it:
+Fitness Coach, Skating Mentor, Nutrition Helper, Special Trip Planner, Photo Timeline, Project Tracker, Study Buddy, Mind Palace and Dance Floor (and the hub) share one set of colors, fonts and components. The canonical copy is [`shared/theme.css`](shared/theme.css). Each app inlines it between the `Shared look` and `end shared look` comments and only overrides the `--accent`, `--accent-ink` and `--accent-soft` values after it:
 
 | App | Light accent | Dark accent |
 | --- | --- | --- |
@@ -345,6 +345,7 @@ Fitness Coach, Skating Mentor, Nutrition Helper, Special Trip Planner, Photo Tim
 | Project Tracker | `#2e7d32` green | `#6fd39a` |
 | Study Buddy | `#0b7285` cyan | `#5fd0e4` |
 | Mind Palace | `#9a6700` amber | `#f2c14e` |
+| Dance Floor | `#a21caf` fuchsia | `#e879f9` |
 
 VoiceTrainer has its own type and panel styles but follows the same token names for `--bg`, `--ink`, `--muted`, `--line` and `--accent`.
 
