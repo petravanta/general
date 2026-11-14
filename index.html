@@ -30,6 +30,7 @@
 .app.study{--app:#0b7285;--app-soft:#d7eef2}
 .app.mind{--app:#9a6700;--app-soft:#f6ecd2}
 .app.dance{--app:#a21caf;--app-soft:#f7e4f9}
+.app.wardrobe{--app:#475569;--app-soft:#e5e9ef}
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]) .app.fitness{--app:#9d95ff;--app-soft:#25224d}
   :root:not([data-theme="light"]) .app.skating{--app:#f0679f;--app-soft:#3d1a2a}
@@ -40,7 +41,8 @@
   :root:not([data-theme="light"]) .app.project{--app:#6fd39a;--app-soft:#143224}
   :root:not([data-theme="light"]) .app.study{--app:#5fd0e4;--app-soft:#0f2f36}
   :root:not([data-theme="light"]) .app.mind{--app:#f2c14e;--app-soft:#33280f}
-  :root:not([data-theme="light"]) .app.dance{--app:#e879f9;--app-soft:#33173a}}
+  :root:not([data-theme="light"]) .app.dance{--app:#e879f9;--app-soft:#33173a}
+  :root:not([data-theme="light"]) .app.wardrobe{--app:#a5b4c8;--app-soft:#222b36}}
 :root[data-theme="dark"] .app.fitness{--app:#9d95ff;--app-soft:#25224d}
 :root[data-theme="dark"] .app.skating{--app:#f0679f;--app-soft:#3d1a2a}
 :root[data-theme="dark"] .app.voice{--app:#9aa6ff;--app-soft:#1e2447}
@@ -51,6 +53,7 @@
 :root[data-theme="dark"] .app.study{--app:#5fd0e4;--app-soft:#0f2f36}
 :root[data-theme="dark"] .app.mind{--app:#f2c14e;--app-soft:#33280f}
 :root[data-theme="dark"] .app.dance{--app:#e879f9;--app-soft:#33173a}
+:root[data-theme="dark"] .app.wardrobe{--app:#a5b4c8;--app-soft:#222b36}
 
 .topbar{padding-block:14px}
 .theme-slot{margin-left:auto;display:flex}
@@ -154,6 +157,12 @@ footer a{color:var(--muted)}
       <h2><a href="https://petravanta.github.io/dance-floor/">Dance Floor</a></h2>
       <p>A friendly primer on basic moves for goth, industrial and rave nights, with short how-to cues and a beat to count along to.</p>
       <div class="links"><span class="open" aria-hidden="true">Open →</span><a class="src" href="https://github.com/petravanta/dance-floor">Source</a></div>
+    </li>
+    <li class="app wardrobe">
+      <div class="icon"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 6.5a2.6 2.6 0 1 1 2.6 2.6c-1 0-2.6.9-2.6 2.4v1.2L4.4 21.5a1.6 1.6 0 0 0 1 2.9h21.2a1.6 1.6 0 0 0 1-2.9L16 12.7" fill="var(--app-soft)" stroke="var(--app)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <h2><a href="https://petravanta.github.io/wardrobe/">Wardrobe</a></h2>
+      <p>A catalogue of the clothes you own, outfits you put together and what you wore, kept in an open file in your own Google Drive.</p>
+      <div class="links"><span class="open" aria-hidden="true">Open →</span><a class="src" href="https://github.com/petravanta/wardrobe">Source</a></div>
     </li>
   </ul>
 </main>

@@ -7,7 +7,7 @@
 # Running it again updates the rule and settings in place, so it's also how you roll out a change to either.
 set -euo pipefail
 cd "$(dirname "$0")"
-repos=(general fitness-coach skating-mentor voicetrainer nutrition-helper special-trip-planner photo-timeline project-tracker study-buddy mind-palace dance-floor)
+repos=(general fitness-coach skating-mentor voicetrainer nutrition-helper special-trip-planner photo-timeline project-tracker study-buddy mind-palace dance-floor wardrobe)
 if [ $# -gt 0 ]; then repos=("$@"); fi
 for r in "${repos[@]}"; do
   gh api -X PATCH "repos/petravanta/$r" --input repo-settings.json >/dev/null && echo "settings $r"
