@@ -37,6 +37,9 @@ done
 [ "$open_prs" = 1 ] && [ "$push" = 0 ] && { echo "--open-prs goes with --push." >&2; exit 64; }
 [ "$push" = 1 ] && [ "$skip_backup" = 1 ] && { echo "--push needs the backup step (it tells us what GitHub already has)." >&2; exit 64; }
 here=$(cd "$(dirname "$0")" && pwd)
+if [ "$open_prs" = 1 ] && ! command -v gh >/dev/null 2>&1; then
+  echo "--open-prs needs the GitHub CLI: https://cli.github.com (Windows: winget install --id GitHub.cli), then gh auth login." >&2; exit 64
+fi
 state="$dest/sync-state.txt"
 report="$dest/sync-report.txt"
 now=$(date +%s)
@@ -126,7 +129,12 @@ check_clone() {
   url=$(git -C "$d" config --get remote.origin.url 2>/dev/null || true)
   if [[ $url =~ github\.com[:/]$owner/([^/]+)$ ]]; then name=${BASH_REMATCH[1]%.git}; fi
   echo "== ${name:-$(basename "$d")}  ($rel)"
-  [ -n "$url" ] || { need "$rel: no remote at all, so nothing here is on GitHub"; echo; return; }
+  if [ -z "$url" ]; then
+    need "$rel: no remote at all, so nothing here is on GitHub"
+    info "to put it on GitHub (private): cd \"$d\" && gh repo create $owner/$(basename "$d") --private --source . --push"
+    info "then add it to github/repos.txt. Not done for you, because creating a repo is your call."
+    echo; return
+  fi
   [ -n "$name" ] || info "origin is $url (not $owner's), so only checking, never pushing"
   mirror="$dest/$name.git"
 

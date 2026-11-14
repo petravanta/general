@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Keeps a full local mirror (every branch and tag) of every petravanta GitHub repo. See STANDARDS.md, "Backups".
-# Run it on your own machine with the GitHub CLI signed in (gh auth login) and git on the PATH.
+# Run it on your own machine with git on the PATH. With the GitHub CLI signed in (gh auth login) it finds every repo by
+# itself; without it, it backs up github/repos.txt, the mirrors it already has and your clones' origins, using plain git.
 #   ./github/backup-repos.sh                        # mirror new repos, refresh existing ones
 #   ./github/backup-repos.sh --dry-run              # show what it would do, change nothing
 #   ./github/backup-repos.sh --bundle /g/backups    # also write one <repo>.bundle per repo there (the second copy)
@@ -25,7 +26,7 @@ while [ $# -gt 0 ]; do
     --dest) dest=$2; shift ;;
     --delay) delay=$2; shift ;;
     --progress) progress=$2; shift ;;
-    -h|--help) sed -n '2,15p' "$0"; exit 0 ;;
+    -h|--help) sed -n '2,16p' "$0"; exit 0 ;;
     *) only+=("$1") ;;
   esac
   shift
@@ -47,18 +48,44 @@ gh_git() {  # a git command that talks to GitHub: pause between repos, stop dead
 }
 wanted() { [ ${#only[@]} -eq 0 ] && return 0; local o; for o in "${only[@]}"; do [ "$o" = "$1" ] && return 0; done; return 1; }
 
+# Without gh: repos.txt, the mirrors already here, and the origins of local clones. Plain git, no API.
+names_without_gh() {
+  local here; here=$(cd "$(dirname "$0")" && pwd)
+  {
+    if [ -f "$here/repos.txt" ]; then sed 's/#.*//; s/[[:space:]]//g' "$here/repos.txt"; fi
+    for m in "$dest"/*.git; do if [ -d "$m" ]; then basename "$m" .git; fi; done
+    find "$(dirname "$dest")" -maxdepth 4 \( -name _backups -o -name node_modules \) -prune -o -name .git -print 2>/dev/null |
+      while IFS= read -r g; do
+        url=$(git -C "$(dirname "$g")" config --get remote.origin.url 2>/dev/null || true)
+        if [[ $url =~ github\.com[:/]$owner/([^/]+)$ ]]; then echo "${BASH_REMATCH[1]%.git}"; fi
+      done
+  } | grep . | sort -u | sed 's/$/\t{}/'
+}
+
 # The one API call: a line per repo, "name<TAB>details as JSON". The details are kept as repos.json.
-lines=$(gh repo list "$owner" --limit 500 \
-  --json name,description,visibility,homepageUrl,defaultBranchRef,isArchived,isFork,pushedAt \
-  --jq '.[] | "\(.name)\t\(tojson)"' 2>"${TMPDIR:-/tmp}/backup-repos.err") || true
-if [ -z "$lines" ]; then
-  cat "${TMPDIR:-/tmp}/backup-repos.err" >&2
-  grep -Eq "$limit_re" "${TMPDIR:-/tmp}/backup-repos.err" && { echo "STOPPED: GitHub answered with a limit. Not retrying." >&2; exit 2; }
-  echo "No repos listed for $owner. Is gh signed in?" >&2; exit 1
+lines=""; from_gh=0
+if command -v gh >/dev/null 2>&1; then
+  lines=$(gh repo list "$owner" --limit 500 \
+    --json name,description,visibility,homepageUrl,defaultBranchRef,isArchived,isFork,pushedAt \
+    --jq '.[] | "\(.name)\t\(tojson)"' 2>"${TMPDIR:-/tmp}/backup-repos.err") || true
+  if [ -n "$lines" ]; then from_gh=1
+  else
+    cat "${TMPDIR:-/tmp}/backup-repos.err" >&2
+    grep -Eq "$limit_re" "${TMPDIR:-/tmp}/backup-repos.err" && { echo "STOPPED: GitHub answered with a limit. Not retrying." >&2; exit 2; }
+    echo "The GitHub CLI is installed but not signed in. Run: gh auth login"
+  fi
+else
+  echo "The GitHub CLI (gh) is not installed, so new repos on GitHub are not found automatically."
+  echo "  To add it: https://cli.github.com (Windows: winget install --id GitHub.cli), then run: gh auth login"
+fi
+if [ "$from_gh" = 0 ]; then
+  lines=$(names_without_gh)
+  [ -n "$lines" ] || { echo "No repos to back up: add names to github/repos.txt, or install gh." >&2; exit 1; }
+  echo "Using plain git for $(printf '%s\n' "$lines" | wc -l | tr -d ' ') repos from repos.txt, existing mirrors and local clones."
 fi
 
 run mkdir -p "$dest"
-if [ "$dry" = 0 ]; then printf '%s\n' "$lines" | cut -f2- | paste -sd, - | sed 's/^/[/; s/$/]/' > "$dest/repos.json"; fi
+if [ "$dry" = 0 ] && [ "$from_gh" = 1 ]; then printf '%s\n' "$lines" | cut -f2- | paste -sd, - | sed 's/^/[/; s/$/]/' > "$dest/repos.json"; fi
 [ -n "$bundle_dir" ] && run mkdir -p "$bundle_dir"
 
 failed=0

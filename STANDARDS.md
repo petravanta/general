@@ -27,7 +27,7 @@ Add two things to the app's HTML:
 1. Publish it on GitHub Pages under `petravanta.github.io/<repo>/`.
 2. Add the back link (above), the theme switch (below) and the install files (*Installing on a phone*), follow *Built-in knowledge* for its content, and *User data* for what people save.
 3. Apply the *Protect main* ruleset and the repo settings for *Merging pull requests*: `./github/apply-ruleset.sh <repo>`.
-4. Back it up: run `.\github\backup-repos.ps1 <repo>` (or `./github/backup-repos.sh <repo>`) once so its mirror exists from day one (*Backups*). After that the regular run picks it up by itself, because the script backs up every repo petravanta owns. Keep its working clone under `F:\Dev\petravantaapps` so `sync-all` checks it too (*Syncing every project*).
+4. Back it up: run `.\github\backup-repos.ps1 <repo>` (or `./github/backup-repos.sh <repo>`) once so its mirror exists from day one (*Backups*), and add its name to [`github/repos.txt`](github/repos.txt). After that the regular run picks it up by itself, because the script backs up every repo petravanta owns. Keep its working clone under `F:\Dev\petravantaapps` so `sync-all` checks it too (*Syncing every project*).
 5. Add a card for it to [`index.html`](index.html): copy an existing `<li class="app …">`, set its name, link, one-line description and icon, and add a `--app` / `--app-soft` accent pair (light and dark) in the `<style>` block. Also add the app to [`shared/apps.json`](shared/apps.json) (id, name, url and the same light and dark accents) so it shows in every app's menu, and add the repo to `repos` in `github/apply-ruleset.sh`.
 
 ## Light and dark themes
@@ -237,7 +237,7 @@ Good storage means more than one copy. Every petravanta repo is kept in at least
 
 ### Keeping it fresh
 
-[`github/backup-repos.ps1`](github/backup-repos.ps1) (Windows) and [`github/backup-repos.sh`](github/backup-repos.sh) (Git Bash, macOS, Linux) do the same thing: list petravanta's repos, clone a mirror of any new one and refresh the rest. Run them on your own machine with the [GitHub CLI](https://cli.github.com/) signed in.
+[`github/backup-repos.ps1`](github/backup-repos.ps1) (Windows) and [`github/backup-repos.sh`](github/backup-repos.sh) (Git Bash, macOS, Linux) do the same thing: list petravanta's repos, clone a mirror of any new one and refresh the rest. Run them on your own machine. With the [GitHub CLI](https://cli.github.com/) signed in (`winget install --id GitHub.cli`, then `gh auth login`) they find every repo by themselves. Without it they still work, with plain git: they back up the repos named in [`github/repos.txt`](github/repos.txt), the mirrors already in `_backups` and the origins of your clones, and say that `gh` is missing.
 
 ```powershell
 .\github\backup-repos.ps1                 # every repo
@@ -299,7 +299,7 @@ Work can sit on one machine for a while: a branch never pushed, a commit waiting
 .\github\sync-all.ps1 -SkipBackup       # report from what's on disk, without touching GitHub
 ```
 
-The report lists, per clone: uncommitted or untracked files, stashes, branches with commits GitHub doesn't have, branches that were never pushed, branches that differ both ways (pull first), local branches already merged (safe to delete), and branches on GitHub that are ahead of `main` with no pull request. It ends with a **Needs you** list and is saved to `_backups\sync-report.txt`.
+The report lists, per clone: uncommitted or untracked files, stashes, branches with commits GitHub doesn't have, branches that were never pushed, branches that differ both ways (pull first), local branches already merged (safe to delete), and branches on GitHub that are ahead of `main` with no pull request. It ends with a **Needs you** list and is saved to `_backups\sync-report.txt`. A folder with no remote at all gets a hint with the `gh repo create … --private --source . --push` line that would put it on GitHub; sync-all never creates repos itself. `-OpenPRs` needs the GitHub CLI; everything else works with plain git.
 
 What it will and won't do:
 
