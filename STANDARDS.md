@@ -313,7 +313,7 @@ Bulk activity from one account across many repos can look like a misbehaving bot
 
 - **One repo at a time**, never in parallel, with a **random 5 to 15 second pause** before every call to GitHub (the backup step pauses between repos too). `-Delay 10-30` slows it further.
 - **Small caps per run:** at most **5 pushes** (`-MaxPushes`) and **2 new pull requests** (`-MaxPRs`). Anything over a cap is listed under **Next run** and picked up then.
-- **A minimum gap between runs** of 60 minutes (`-MinInterval`), recorded in `_backups\sync-state.txt`. A run started too soon stops before doing anything. `-SkipBackup` reports never count, because they don't touch GitHub.
+- **A minimum gap between runs** of 60 minutes (`-MinInterval`), recorded in `_backups\sync-state.txt`. A run started too soon stops before doing anything. Only a run whose backup finishes counts: if one times out or is cut short, retry straight away and it **resumes**, skipping repos it already refreshed in the last 6 hours (listed in `_backups\sync-progress.txt`, which is cleared once the backup completes). `-SkipBackup` reports never count, because they don't touch GitHub.
 - **A full stop on any refusal.** If GitHub answers 403, 429 or asks us to slow down, the run stops at once, doesn't retry, and the next runs wait out a cool-down: 6 hours, doubling after each further refusal up to 48 hours, back to normal after a clean run. Only a plain network hiccup is retried, twice, after 30 and then 60 seconds.
 - **Plain git first.** Pushes are plain `git push`; the backups are `git fetch`; the GitHub API is used once to list the repos and once per new pull request.
 

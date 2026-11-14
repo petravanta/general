@@ -8,6 +8,7 @@ Run it on your own machine with the GitHub CLI signed in (gh auth login) and git
   .\github\backup-repos.ps1 -Verify                  # also check each mirror is whole (git fsck)
   .\github\backup-repos.ps1 general,voicetrainer     # only the repos you name
   .\github\backup-repos.ps1 -Delay 5-15              # wait a random 5-15 s between repos (sync-all.ps1 does this)
+  .\github\backup-repos.ps1 -Progress FILE           # skip repos listed in FILE, add each one done (lets a cut-short run resume)
 
 Mirrors go to -Dest (default F:\Dev\petravantaapps\_backups).
 
@@ -21,7 +22,8 @@ param(
   [string]$Bundle = '',
   [switch]$DryRun,
   [switch]$Verify,
-  [string]$Delay = '0-0'
+  [string]$Delay = '0-0',
+  [string]$Progress = ''
 )
 $ErrorActionPreference = 'Stop'
 $owner = 'petravanta'
@@ -73,6 +75,7 @@ $failed = $false
 foreach ($r in $list) {
   $name = $r.name
   if ($Repos.Count -gt 0 -and $Repos -notcontains $name) { continue }
+  if ($Progress -and (Test-Path $Progress) -and (Get-Content $Progress) -contains $name) { Write-Host "skip    $name (refreshed earlier, resuming)"; continue }
   $mirror = Join-Path $Dest "$name.git"
   if (Test-Path $mirror) {
     Write-Host "refresh $name"
@@ -90,6 +93,7 @@ foreach ($r in $list) {
     $hasRefs = $DryRun -or (git -C $mirror for-each-ref --count=1)
     if ($hasRefs) { Invoke-Step git @('-C', $mirror, 'bundle', 'create', (Join-Path $Bundle "$name.bundle"), '--all') | Out-Null }
   }
+  if ($Progress -and -not $DryRun) { Add-Content -Encoding ascii $Progress $name }
 }
 
 if ($DryRun) { Write-Host 'Dry run: nothing changed.' }
