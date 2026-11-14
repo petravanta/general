@@ -7,6 +7,7 @@
 #   ./github/backup-repos.sh --verify               # also check each mirror is whole (git fsck)
 #   ./github/backup-repos.sh general voicetrainer   # only the repos you name
 #   ./github/backup-repos.sh --delay 5-15           # wait a random 5-15 s between repos (sync-all.sh does this)
+#   ./github/backup-repos.sh --progress FILE        # skip repos listed in FILE, add each one done (lets a cut-short run resume)
 # Mirrors go to --dest or $BACKUP_DIR (default /f/Dev/petravantaapps/_backups, which is F:\Dev\petravantaapps\_backups in Git Bash).
 #
 # Gentle on GitHub: one API call lists the repos; everything else is plain git fetch, one repo at a time,
@@ -15,7 +16,7 @@
 set -euo pipefail
 owner=petravanta
 dest=${BACKUP_DIR:-/f/Dev/petravantaapps/_backups}
-dry=0; verify=0; bundle_dir=""; only=(); delay=0-0
+dry=0; verify=0; bundle_dir=""; only=(); delay=0-0; progress=""
 while [ $# -gt 0 ]; do
   case "$1" in
     -n|--dry-run) dry=1 ;;
@@ -23,7 +24,8 @@ while [ $# -gt 0 ]; do
     --bundle) bundle_dir=$2; shift ;;
     --dest) dest=$2; shift ;;
     --delay) delay=$2; shift ;;
-    -h|--help) sed -n '2,14p' "$0"; exit 0 ;;
+    --progress) progress=$2; shift ;;
+    -h|--help) sed -n '2,15p' "$0"; exit 0 ;;
     *) only+=("$1") ;;
   esac
   shift
@@ -62,6 +64,7 @@ if [ "$dry" = 0 ]; then printf '%s\n' "$lines" | cut -f2- | paste -sd, - | sed '
 failed=0
 while IFS=$'\t' read -r name _; do
   wanted "$name" || continue
+  if [ -n "$progress" ] && [ -f "$progress" ] && grep -qxF "$name" "$progress"; then echo "skip    $name (refreshed earlier, resuming)"; continue; fi
   mirror="$dest/$name.git"
   if [ -d "$mirror" ]; then
     echo "refresh $name"
@@ -77,6 +80,7 @@ while IFS=$'\t' read -r name _; do
       run git -C "$mirror" bundle create "$bundle_dir/$name.bundle" --all
     fi
   fi
+  if [ -n "$progress" ] && [ "$dry" = 0 ]; then echo "$name" >> "$progress"; fi
 done <<< "$lines"
 
 if [ "$dry" = 1 ]; then echo "Dry run: nothing changed."; exit $failed; fi

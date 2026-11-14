@@ -63,8 +63,11 @@ if [ "$skip_backup" = 0 ]; then
     echo "Last run was $(( (now - last_run) / 60 )) min ago; the minimum gap is $min_interval min. Try after $(when $((last_run + min_interval * 60))), or use --skip-backup." >&2
     exit 3
   fi
-  last_run=$now; save_state
 fi
+# Only a run that finishes its backup counts as a run (last_run is written at the end). If one is cut short,
+# a retry carries on: repos refreshed in the last 6 hours are listed in the progress file and skipped.
+progress="$dest/sync-progress.txt"
+[ -n "$(find "$progress" -mmin +360 2>/dev/null)" ] && rm -f "$progress"
 
 # --- Talking to GitHub ------------------------------------------------------------------------------
 limit_re='HTTP 403|HTTP 429|403 Forbidden|429 Too Many|[Rr]ate limit|abuse|secondary rate|[Tt]oo many requests|[Ss]low down'
@@ -105,10 +108,11 @@ exec > >(tee "$report.tmp") 2>&1
 fresh=0
 if [ "$skip_backup" = 0 ]; then
   echo "== Backups"
-  "$here/backup-repos.sh" --dest "$dest" --delay "$delay"; rc=$?
+  "$here/backup-repos.sh" --dest "$dest" --delay "$delay" --progress "$progress"; rc=$?
   [ "$rc" = 2 ] && stop_for_github
-  if [ "$rc" = 0 ]; then fresh=1; strikes=0; save_state
-  else echo "Backups had problems (see above). Still checking the clones, using what they last fetched."; fi
+  if [ "$rc" = 0 ]; then fresh=1; strikes=0; rm -f "$progress"
+  else echo "Backups had problems (see above). Still checking the clones, using what they last fetched."
+       echo "This doesn't count as a run, so you can retry straight away; repos already refreshed are skipped."; fi
   echo
 fi
 
@@ -227,6 +231,6 @@ echo
 echo "== Summary: $found clone(s) checked, $pushes push(es), $prs PR(s) opened, $calls GitHub call(s) after the backup"
 if [ ${#needs[@]} -gt 0 ]; then echo "Needs you:"; printf '  - %s\n' "${needs[@]}"; else echo "Everything local is on GitHub."; fi
 if [ ${#later[@]} -gt 0 ]; then echo "Next run (over this run's caps):"; printf '  - %s\n' "${later[@]}"; fi
-[ "$skip_backup" = 0 ] && save_state
+[ "$fresh" = 1 ] && { last_run=$now; save_state; }
 mv -f "$report.tmp" "$report" 2>/dev/null && echo "(Saved to $report)"
 exit 0
