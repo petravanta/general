@@ -26,10 +26,10 @@ Add two things to the app's HTML:
 
 1. Publish it on GitHub Pages under `petravanta.github.io/<repo>/`.
 2. Add the back link (above), the theme switch (below) and the install files (*Installing on a phone*), follow *Built-in knowledge* for its content, and *User data* for what people save.
-3. Apply the *Protect main* ruleset and the repo settings for *Merging pull requests*: `./github/apply-ruleset.sh <repo>`.
+3. Apply the *Protect main* ruleset and the repo settings for *Merging pull requests*: `.\github\apply-ruleset.ps1 <repo>` (or `./github/apply-ruleset.sh <repo>`).
 4. Add the MIT licence: copy [`LICENSE`](LICENSE) into the repo root as is (see *License*).
 5. Back it up: run `.\github\backup-repos.ps1 <repo>` (or `./github/backup-repos.sh <repo>`) once so its mirror exists from day one (*Backups*). After that the regular run picks it up by itself, because the script backs up every repo petravanta owns. Keep its working clone under `F:\Dev\petravantaapps` so `sync-all` checks it too (*Syncing every project*).
-6. Add a card for it to [`index.html`](index.html): copy an existing `<li class="app …">`, set its name, link, one-line description and icon, and add a `--app` / `--app-soft` accent pair (light and dark) in the `<style>` block. Also add the app to [`shared/apps.json`](shared/apps.json) (id, name, url and the same light and dark accents) so it shows in every app's menu, and add the repo to `repos` in `github/apply-ruleset.sh`.
+6. Add a card for it to [`index.html`](index.html): copy an existing `<li class="app …">`, set its name, link, one-line description and icon, and add a `--app` / `--app-soft` accent pair (light and dark) in the `<style>` block. Also add the app to [`shared/apps.json`](shared/apps.json) (id, name, url and the same light and dark accents) so it shows in every app's menu, and add the repo to the repo list in `github/apply-ruleset.ps1` and `github/apply-ruleset.sh`.
 
 ## License
 
@@ -219,13 +219,19 @@ Pull requests merge automatically by default. Nobody needs to press **Merge** on
 - **A failing check stops the merge.** Fix it on the branch and the PR merges when it goes green. Never skip or remove a check to get it through.
 - Merges are squashed into one commit titled after the PR, and the branch is deleted afterwards.
 
-Each repo needs **Allow auto-merge** switched on for this. [`github/repo-settings.json`](github/repo-settings.json) holds the settings (auto-merge, squash merges, delete branches after merge, offer to update a branch) and `./github/apply-ruleset.sh` applies them together with the *Protect main* ruleset below. By hand: **Settings → General → Pull Requests**, tick *Allow auto-merge*, *Allow squash merging* and *Automatically delete head branches*.
+Each repo needs **Allow auto-merge** switched on for this. [`github/repo-settings.json`](github/repo-settings.json) holds the settings (auto-merge, squash merges, delete branches after merge, offer to update a branch) and `.\github\apply-ruleset.ps1` (Windows) or `./github/apply-ruleset.sh` applies them together with the *Protect main* ruleset below. By hand: **Settings → General → Pull Requests**, tick *Allow auto-merge*, *Allow squash merging* and *Automatically delete head branches*.
 
 ## Protecting `main`
 
 Every repo should have a ruleset called **Protect main** on its default branch that blocks force pushes and deleting the branch. Normal pushes and pull request merges work as before. The rule is [`github/main-branch-ruleset.json`](github/main-branch-ruleset.json).
 
-To apply it, or roll out a change to it, run this once (it also applies the settings from *Merging pull requests*) on your own machine with the [GitHub CLI](https://cli.github.com/) signed in (`gh auth login`):
+To apply it, or roll out a change to it, run this once (it also applies the settings from *Merging pull requests*) on your own machine with the [GitHub CLI](https://cli.github.com/) signed in (`gh auth login`). [`github/apply-ruleset.ps1`](github/apply-ruleset.ps1) (Windows PowerShell 5.1 or pwsh) and [`github/apply-ruleset.sh`](github/apply-ruleset.sh) (Git Bash, macOS, Linux) do the same thing:
+
+```powershell
+.\github\apply-ruleset.ps1                # the hub and every app
+.\github\apply-ruleset.ps1 my-new-app     # just one repo
+.\github\apply-ruleset.ps1 -DryRun        # show what it would change
+```
 
 ```sh
 ./github/apply-ruleset.sh                # the hub and every app
@@ -283,7 +289,7 @@ git -C F:/Dev/petravantaapps/_backups/<repo>.git push --mirror https://github.co
 git clone --mirror <repo>.bundle <repo>.git && git -C <repo>.git push --mirror <new remote url>
 ```
 
-`--mirror` sends every branch and tag and makes the remote match the copy exactly, so only push it to a new or empty repo. Then re-apply the settings (`./github/apply-ruleset.sh <repo>`), turn Pages back on (see *What gets copied*) and add the repo's description from `repos.json`.
+`--mirror` sends every branch and tag and makes the remote match the copy exactly, so only push it to a new or empty repo. Then re-apply the settings (`.\github\apply-ruleset.ps1 <repo>` or `./github/apply-ruleset.sh <repo>`), turn Pages back on (see *What gets copied*) and add the repo's description from `repos.json`.
 
 To just get working files back on your machine, `git clone F:/Dev/petravantaapps/_backups/<repo>.git <folder>`.
 
