@@ -27,8 +27,18 @@ Add two things to the app's HTML:
 1. Publish it on GitHub Pages under `petravanta.github.io/<repo>/`.
 2. Add the back link (above), the theme switch (below) and the install files (*Installing on a phone*), follow *Built-in knowledge* for its content, and *User data* for what people save.
 3. Apply the *Protect main* ruleset and the repo settings for *Merging pull requests*: `./github/apply-ruleset.sh <repo>`.
-4. Back it up: run `.\github\backup-repos.ps1 <repo>` (or `./github/backup-repos.sh <repo>`) once so its mirror exists from day one (*Backups*). After that the regular run picks it up by itself, because the script backs up every repo petravanta owns. Keep its working clone under `F:\Dev\petravantaapps` so `sync-all` checks it too (*Syncing every project*).
-5. Add a card for it to [`index.html`](index.html): copy an existing `<li class="app …">`, set its name, link, one-line description and icon, and add a `--app` / `--app-soft` accent pair (light and dark) in the `<style>` block. Also add the app to [`shared/apps.json`](shared/apps.json) (id, name, url and the same light and dark accents) so it shows in every app's menu, and add the repo to `repos` in `github/apply-ruleset.sh`.
+4. Add the MIT licence: copy [`LICENSE`](LICENSE) into the repo root as is (see *License*).
+5. Back it up: run `.\github\backup-repos.ps1 <repo>` (or `./github/backup-repos.sh <repo>`) once so its mirror exists from day one (*Backups*). After that the regular run picks it up by itself, because the script backs up every repo petravanta owns. Keep its working clone under `F:\Dev\petravantaapps` so `sync-all` checks it too (*Syncing every project*).
+6. Add a card for it to [`index.html`](index.html): copy an existing `<li class="app …">`, set its name, link, one-line description and icon, and add a `--app` / `--app-soft` accent pair (light and dark) in the `<style>` block. Also add the app to [`shared/apps.json`](shared/apps.json) (id, name, url and the same light and dark accents) so it shows in every app's menu, and add the repo to `repos` in `github/apply-ruleset.sh`.
+
+## License
+
+Every project, the hub included, is MIT licensed, so anyone can use, change and share the code and the `data/*.json` people contribute.
+
+- Put the standard MIT text in `LICENSE` at the repo root, with the line `Copyright (c) <year the repo started> Petra Vanta`. Copy it from this repo's [`LICENSE`](LICENSE).
+- End the README with a short `## License` section that points at it.
+- Material from elsewhere keeps its own licence. List it in `THIRD_PARTY_NOTICES.md` (what it is, where it lives in the repo, its licence and full notice when the licence asks for one), as VoiceTrainer does for the CMU Pronouncing Dictionary. Never relabel someone else's work as MIT.
+- Before adding a dependency, check its licence. Permissive ones (MIT, BSD, Apache-2.0, ISC, CC BY) are fine with a notice. Copyleft ones (GPL, AGPL, CC BY-SA) are a decision for petravanta, because they set terms for the whole app or for what's built from them.
 
 ## Light and dark themes
 
@@ -253,7 +263,7 @@ They are gentle on GitHub on purpose: **one** API call to list the repos, then p
   schtasks /Create /TN "petravanta backups" /SC WEEKLY /D SUN /ST 19:00 /TR "powershell -NoProfile -ExecutionPolicy Bypass -File F:\Dev\petravantaapps\general\github\backup-repos.ps1"
   ```
   This assumes a working clone of this repo at `F:\Dev\petravantaapps\general`; adjust the path if yours lives elsewhere.
-- **New apps** are picked up by the next run with nothing to configure. Step 4 of *Adding a new app* runs it once straight away.
+- **New apps** are picked up by the next run with nothing to configure. Step 5 of *Adding a new app* runs it once straight away.
 
 ### A second copy (recommended)
 
