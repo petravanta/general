@@ -31,6 +31,7 @@
 .app.mind{--app:#9a6700;--app-soft:#f6ecd2}
 .app.dance{--app:#a21caf;--app-soft:#f7e4f9}
 .app.wardrobe{--app:#475569;--app-soft:#e5e9ef}
+.app.mixmaster{--app:#5d7a0f;--app-soft:#edf3db}
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]) .app.fitness{--app:#9d95ff;--app-soft:#25224d}
   :root:not([data-theme="light"]) .app.skating{--app:#f0679f;--app-soft:#3d1a2a}
@@ -42,7 +43,8 @@
   :root:not([data-theme="light"]) .app.study{--app:#5fd0e4;--app-soft:#0f2f36}
   :root:not([data-theme="light"]) .app.mind{--app:#f2c14e;--app-soft:#33280f}
   :root:not([data-theme="light"]) .app.dance{--app:#e879f9;--app-soft:#33173a}
-  :root:not([data-theme="light"]) .app.wardrobe{--app:#a5b4c8;--app-soft:#222b36}}
+  :root:not([data-theme="light"]) .app.wardrobe{--app:#a5b4c8;--app-soft:#222b36}
+  :root:not([data-theme="light"]) .app.mixmaster{--app:#b8d957;--app-soft:#252f10}}
 :root[data-theme="dark"] .app.fitness{--app:#9d95ff;--app-soft:#25224d}
 :root[data-theme="dark"] .app.skating{--app:#f0679f;--app-soft:#3d1a2a}
 :root[data-theme="dark"] .app.voice{--app:#9aa6ff;--app-soft:#1e2447}
@@ -54,6 +56,7 @@
 :root[data-theme="dark"] .app.mind{--app:#f2c14e;--app-soft:#33280f}
 :root[data-theme="dark"] .app.dance{--app:#e879f9;--app-soft:#33173a}
 :root[data-theme="dark"] .app.wardrobe{--app:#a5b4c8;--app-soft:#222b36}
+:root[data-theme="dark"] .app.mixmaster{--app:#b8d957;--app-soft:#252f10}
 
 .topbar{padding-block:14px}
 .theme-slot{margin-left:auto;display:flex}
@@ -163,6 +166,12 @@ footer a{color:var(--muted)}
       <h2><a href="https://petravanta.github.io/wardrobe/">Wardrobe</a></h2>
       <p>A catalogue of the clothes you own, outfits you put together and what you wore, kept in an open file in your own Google Drive.</p>
       <div class="links"><span class="open" aria-hidden="true">Open →</span><a class="src" href="https://github.com/petravanta/wardrobe">Source</a></div>
+    </li>
+    <li class="app mixmaster">
+      <div class="icon"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M4 6h24L18 17.5V25h5v2.5H9V25h5v-7.5z" fill="var(--app)"/><circle cx="22.5" cy="9.5" r="2.6" fill="var(--app-soft)"/></svg></div>
+      <h2><a href="https://petravanta.github.io/mixmaster/">Mixmaster</a></h2>
+      <p>Cocktails ranked by what's in your bar, nudging you toward the opened, aging and one-recipe bottles that most need using up.</p>
+      <div class="links"><span class="open" aria-hidden="true">Open →</span><a class="src" href="https://github.com/petravanta/mixmaster">Source</a></div>
     </li>
   </ul>
 </main>
