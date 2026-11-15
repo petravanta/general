@@ -24,7 +24,7 @@ $ruleset = Join-Path $PSScriptRoot 'main-branch-ruleset.json'
 
 # Keep this list in step with repos=(...) in apply-ruleset.sh.
 $all = @('general', 'fitness-coach', 'skating-mentor', 'voicetrainer', 'nutrition-helper', 'special-trip-planner',
-  'photo-timeline', 'project-tracker', 'study-buddy', 'mind-palace', 'dance-floor', 'wardrobe')
+  'photo-timeline', 'project-tracker', 'study-buddy', 'mind-palace', 'dance-floor', 'wardrobe', 'mixmaster')
 $Repos = @($Repos | ForEach-Object { $_ -split ',' } | ForEach-Object { $_.Trim() } | Where-Object { $_ })
 if ($Repos.Count -eq 0) { $Repos = $all }
 
