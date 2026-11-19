@@ -1,6 +1,8 @@
 # Shared standards for petravanta's apps
 
-These apply to every app linked from the hub at **https://petravanta.github.io/general/**: [Fitness Coach](https://github.com/petravanta/fitness-coach), [Skating Mentor](https://github.com/petravanta/skating-mentor), [VoiceTrainer](https://github.com/petravanta/voicetrainer), [Nutrition Helper](https://github.com/petravanta/nutrition-helper), [Special Trip Planner](https://github.com/petravanta/special-trip-planner), [Photo Timeline](https://github.com/petravanta/photo-timeline), [Project Tracker](https://github.com/petravanta/project-tracker), [Study Buddy](https://github.com/petravanta/study-buddy) and [Mind Palace](https://github.com/petravanta/mind-palace).
+These apply to every app linked from the hub at **https://petravanta.github.io/general/**: [Fitness Coach](https://github.com/petravanta/fitness-coach), [Skating Mentor](https://github.com/petravanta/skating-mentor), [VoiceTrainer](https://github.com/petravanta/voicetrainer), [Nutrition Helper](https://github.com/petravanta/nutrition-helper), [Special Trip Planner](https://github.com/petravanta/special-trip-planner), [Photo Timeline](https://github.com/petravanta/photo-timeline), [Project Tracker](https://github.com/petravanta/project-tracker), [Study Buddy](https://github.com/petravanta/study-buddy), [Mind Palace](https://github.com/petravanta/mind-palace), [Dance Floor](https://github.com/petravanta/dance-floor), [Wardrobe](https://github.com/petravanta/wardrobe) and [Mixmaster](https://github.com/petravanta/mixmaster).
+
+[`CHECKLIST.md`](CHECKLIST.md) lists every concern below as one row each (what, for which repos, how it's checked), and *Checking every project* explains the script that checks them all.
 
 ## Back link to the hub
 
@@ -25,10 +27,21 @@ Add two things to the app's HTML:
 ## Adding a new app
 
 1. Publish it on GitHub Pages under `petravanta.github.io/<repo>/`.
-2. Add the back link (above), the theme switch (below) and the install files (*Installing on a phone*), follow *Built-in knowledge* for its content, and *User data* for what people save.
-3. Apply the *Protect main* ruleset and the repo settings for *Merging pull requests*: `./github/apply-ruleset.sh <repo>`.
-4. Back it up: run `.\github\backup-repos.ps1 <repo>` (or `./github/backup-repos.sh <repo>`) once so its mirror exists from day one (*Backups*), and add its name to [`github/repos.txt`](github/repos.txt). After that the regular run picks it up by itself, because the script backs up every repo petravanta owns. Keep its working clone under `F:\Dev\petravantaapps` so `sync-all` checks it too (*Syncing every project*).
-5. Add a card for it to [`index.html`](index.html): copy an existing `<li class="app …">`, set its name, link, one-line description and icon, and add a `--app` / `--app-soft` accent pair (light and dark) in the `<style>` block. Also add the app to [`shared/apps.json`](shared/apps.json) (id, name, url and the same light and dark accents) so it shows in every app's menu, and add the repo to `repos` in `github/apply-ruleset.sh`.
+2. Add the back link (above), the theme switch (below), the install files (*Installing on a phone*) and the version footer with its deploy workflow (*Version and build info*), follow *Built-in knowledge* for its content, and *User data* for what people save.
+3. Apply the *Protect main* ruleset and the repo settings for *Merging pull requests*: `.\github\apply-ruleset.ps1 <repo>` (or `./github/apply-ruleset.sh <repo>`).
+4. Add the MIT licence: copy [`LICENSE`](LICENSE) into the repo root as is (see *License*).
+5. Back it up: run `.\github\backup-repos.ps1 <repo>` (or `./github/backup-repos.sh <repo>`) once so its mirror exists from day one (*Backups*), and add its name to [`github/repos.txt`](github/repos.txt). After that the regular run picks it up by itself, because the script backs up every repo petravanta owns. Keep its working clone under `F:\Dev\petravantaapps` so `sync-all` checks it too (*Syncing every project*).
+6. Add a card for it to [`index.html`](index.html): copy an existing `<li class="app …">`, set its name, link, one-line description and icon, and add a `--app` / `--app-soft` accent pair (light and dark) in the `<style>` block. Also add the app to [`shared/apps.json`](shared/apps.json) (id, name, url and the same light and dark accents) so it shows in every app's menu, and add the repo to the repo list in `github/apply-ruleset.ps1` and `github/apply-ruleset.sh`.
+7. Check it: `.\github\standards.ps1 <repo>` (or `./github/standards.sh <repo>`) should report no gaps (*Checking every project*).
+
+## License
+
+Every project, the hub included, is MIT licensed, so anyone can use, change and share the code and the `data/*.json` people contribute.
+
+- Put the standard MIT text in `LICENSE` at the repo root, with the line `Copyright (c) <year the repo started> Petra Vanta`. Copy it from this repo's [`LICENSE`](LICENSE).
+- End the README with a short `## License` section that points at it.
+- Material from elsewhere keeps its own licence. List it in `THIRD_PARTY_NOTICES.md` (what it is, where it lives in the repo, its licence and full notice when the licence asks for one), as VoiceTrainer does for the CMU Pronouncing Dictionary. Never relabel someone else's work as MIT.
+- Before adding a dependency, check its licence. Permissive ones (MIT, BSD, Apache-2.0, ISC, CC BY) are fine with a notice. Copyleft ones (GPL, AGPL, CC BY-SA) are a decision for petravanta, because they set terms for the whole app or for what's built from them.
 
 ## Light and dark themes
 
@@ -78,7 +91,7 @@ Everything a person saves belongs to them: it stays in their browser and, if the
 ### Where it lives
 
 - The browser keeps the working copy in `localStorage`.
-- **Google Drive sync** is optional. Each app keeps one JSON file, `<App name> data.json`, in the user's own Drive, using the `drive.file` scope (the app sees only the file it created) and the shared OAuth client that allows `https://petravanta.github.io`. It saves a few seconds after each change, and merges with the browser copy on connect and whenever the app comes back into view.
+- **Google Drive sync** is optional. Each app keeps one JSON file, `<App name> data.json`, in the user's own Drive, in a folder per app: `petravanta/<App name>/<App name> data.json`. Anything else an app saves to Drive (photos, exports) goes in the same app folder. The `petravanta` folder is shared by all the apps (they use one OAuth client, so each sees the folder whichever app made it). A file saved before folders existed, in the root of My Drive, is **moved** (not copied) into the app's folder once, on the first connect, so its id stays the same and other devices carry on. Apps use the `drive.file` scope (they see only files and folders they created) and the shared OAuth client that allows `https://petravanta.github.io`. It saves a few seconds after each change, and merges with the browser copy on connect and whenever the app comes back into view.
 - **Export backup** downloads the whole document as JSON, and **Import backup** merges one back in. Imports from other apps (a Fitbod CSV, a MacroFactor export) are read in the browser and become ordinary records.
 
 ### Staying connected to Google Drive
@@ -91,7 +104,7 @@ These are static pages with no server, so Google gives them no refresh token: a 
 - **Open without waiting for Google.** The app opens on the browser's copy and keeps saving changes there; the first tap after the hour reconnects, merges Drive's copy in, then writes. Never put a "Reconnect" screen in front of data the browser already has.
 - **Sign out forgets, doesn't revoke.** Signing out removes this browser's token. Revoking would cut off every app and every device that uses the same Google permission; people can remove it at myaccount.google.com/permissions.
 
-`shared/drive-store.js` does all of this for an app whose data is one JSON file (Fitness Coach, VoiceTrainer, Study Buddy and Mind Palace inline it). Skating Mentor, Nutrition Helper and Photo Timeline have their own Drive code and use `google-token.js` for the sign-in.
+`shared/drive-store.js` does all of this, the folders included, for an app whose data is one JSON file (Fitness Coach, VoiceTrainer, Study Buddy and Mind Palace inline it). Skating Mentor, Nutrition Helper and Photo Timeline have their own Drive code and use `google-token.js` for the sign-in.
 
 ### Shape
 
@@ -192,6 +205,29 @@ An app with a build step (VoiceTrainer) keeps these files in `pwa/`, adds the he
 
 All apps and the hub follow this. Fitness Coach and Nutrition Helper have their own `sw.js` that predates the shared worker and does the same job.
 
+## Version and build info
+
+Every app shows which build is running in a small line at the very bottom of the page, so a bug report or a screenshot says exactly what was deployed:
+
+> v1.4.0 · `a1b2c3d` · built 11 Nov 2026, 09:23 · **Copy debug info**
+
+- The short commit links to that commit on GitHub. **Copy debug info** copies the app, version, commit, build time, page URL, browser, screen, theme, service-worker and online state as plain text, ready to paste into an issue or a chat with a coding agent.
+- The version (`v1.4.0`) is optional. An app that wants one keeps `{ "version": "1.4.0" }` in a `version.json` at its root and bumps it by hand; the commit and build time are always stamped.
+
+Add two things:
+
+1. **The script**, just before `</body>`, after `hub-link.js`:
+
+   ```html
+   <script src="https://petravanta.github.io/general/shared/version-footer.js" defer></script>
+   ```
+
+   [`shared/version-footer.js`](shared/version-footer.js) reads `version.json` next to the page and adds a `<footer>` at the end of `<body>`, styled with the app's `--muted`, `--line`, `--ink` and `--accent` tokens, so it follows light and dark themes and respects the phone's safe-area insets. An app with a fixed bottom bar adds an empty `<div data-version-footer></div>` where the line should go instead (for example at the end of its scrolling content or settings), so the bar doesn't cover it. The info is also on `window.APP_BUILD` for the app's own error messages.
+
+2. **The deploy workflow**, so `version.json` gets stamped: copy [`github/workflows/pages.yml`](github/workflows/pages.yml) to `.github/workflows/pages.yml` in the app. It deploys the repo to GitHub Pages on every push to `main` and writes `commit`, `built` and `repo` into `version.json` on the way (keeping any `version` already there). Then switch the repo's Pages source to GitHub Actions: `./github/apply-ruleset.sh <repo>` (or `.ps1`) does that for every repo that has the workflow, or by hand **Settings → Pages → Source → GitHub Actions**. The workflow checks the source first, so landing it before the switch is harmless: it stops early and Pages keeps deploying from the branch.
+
+Until both are in place the footer still shows, with the page's last-modified date and the word *unstamped*, so a missing stamp is visible rather than silent. An app with a build step (VoiceTrainer) adds the same stamp to its own deploy workflow instead of copying this one.
+
 ## Notes for coding agents
 
 Each app has an `AGENTS.md` that links back here and lists only what's specific to that app, plus a one-line `CLAUDE.md` containing `@AGENTS.md` so Claude Code reads the same notes.
@@ -209,13 +245,19 @@ Pull requests merge automatically by default. Nobody needs to press **Merge** on
 - **A failing check stops the merge.** Fix it on the branch and the PR merges when it goes green. Never skip or remove a check to get it through.
 - Merges are squashed into one commit titled after the PR, and the branch is deleted afterwards.
 
-Each repo needs **Allow auto-merge** switched on for this. [`github/repo-settings.json`](github/repo-settings.json) holds the settings (auto-merge, squash merges, delete branches after merge, offer to update a branch) and `./github/apply-ruleset.sh` applies them together with the *Protect main* ruleset below. By hand: **Settings → General → Pull Requests**, tick *Allow auto-merge*, *Allow squash merging* and *Automatically delete head branches*.
+Each repo needs **Allow auto-merge** switched on for this. [`github/repo-settings.json`](github/repo-settings.json) holds the settings (auto-merge, squash merges, delete branches after merge, offer to update a branch) and `.\github\apply-ruleset.ps1` (Windows) or `./github/apply-ruleset.sh` applies them together with the *Protect main* ruleset below. By hand: **Settings → General → Pull Requests**, tick *Allow auto-merge*, *Allow squash merging* and *Automatically delete head branches*.
 
 ## Protecting `main`
 
 Every repo should have a ruleset called **Protect main** on its default branch that blocks force pushes and deleting the branch. Normal pushes and pull request merges work as before. The rule is [`github/main-branch-ruleset.json`](github/main-branch-ruleset.json).
 
-To apply it, or roll out a change to it, run this once (it also applies the settings from *Merging pull requests*) on your own machine with the [GitHub CLI](https://cli.github.com/) signed in (`gh auth login`):
+To apply it, or roll out a change to it, run this once (it also applies the settings from *Merging pull requests*) on your own machine with the [GitHub CLI](https://cli.github.com/) signed in (`gh auth login`). [`github/apply-ruleset.ps1`](github/apply-ruleset.ps1) (Windows PowerShell 5.1 or pwsh) and [`github/apply-ruleset.sh`](github/apply-ruleset.sh) (Git Bash, macOS, Linux) do the same thing:
+
+```powershell
+.\github\apply-ruleset.ps1                # the hub and every app
+.\github\apply-ruleset.ps1 my-new-app     # just one repo
+.\github\apply-ruleset.ps1 -DryRun        # show what it would change
+```
 
 ```sh
 ./github/apply-ruleset.sh                # the hub and every app
@@ -253,7 +295,7 @@ They are gentle on GitHub on purpose: **one** API call to list the repos, then p
   schtasks /Create /TN "petravanta backups" /SC WEEKLY /D SUN /ST 19:00 /TR "powershell -NoProfile -ExecutionPolicy Bypass -File F:\Dev\petravantaapps\general\github\backup-repos.ps1"
   ```
   This assumes a working clone of this repo at `F:\Dev\petravantaapps\general`; adjust the path if yours lives elsewhere.
-- **New apps** are picked up by the next run with nothing to configure. Step 4 of *Adding a new app* runs it once straight away.
+- **New apps** are picked up by the next run with nothing to configure. Step 5 of *Adding a new app* runs it once straight away.
 
 ### A second copy (recommended)
 
@@ -273,7 +315,7 @@ git -C F:/Dev/petravantaapps/_backups/<repo>.git push --mirror https://github.co
 git clone --mirror <repo>.bundle <repo>.git && git -C <repo>.git push --mirror <new remote url>
 ```
 
-`--mirror` sends every branch and tag and makes the remote match the copy exactly, so only push it to a new or empty repo. Then re-apply the settings (`./github/apply-ruleset.sh <repo>`), turn Pages back on (see *What gets copied*) and add the repo's description from `repos.json`.
+`--mirror` sends every branch and tag and makes the remote match the copy exactly, so only push it to a new or empty repo. Then re-apply the settings (`.\github\apply-ruleset.ps1 <repo>` or `./github/apply-ruleset.sh <repo>`), turn Pages back on (see *What gets copied*) and add the repo's description from `repos.json`.
 
 To just get working files back on your machine, `git clone F:/Dev/petravantaapps/_backups/<repo>.git <folder>`.
 
@@ -319,9 +361,40 @@ Bulk activity from one account across many repos can look like a misbehaving bot
 
 Run it by hand once a week or after a burst of work. The scheduled weekly backup above can stay as it is, or point it at `sync-all.ps1` (report-only) instead of `backup-repos.ps1` to get the report too.
 
+## Checking every project
+
+[`CHECKLIST.md`](CHECKLIST.md) is the list of everything a project built on these standards has to cover, from the licence to the theme switch to the *Protect main* ruleset. [`github/standards.ps1`](github/standards.ps1) (Windows) and [`github/standards.sh`](github/standards.sh) (Git Bash, Linux; needs bash 4) read that list and check every repo against it, so bringing the apps in line is one command rather than a dozen repo-by-repo chores.
+
+```powershell
+.\github\standards.ps1                           # report for the hub and every app; changes nothing
+.\github\standards.ps1 wardrobe                  # just one repo
+.\github\standards.ps1 -Only auto-merge,license  # just some rows of the checklist
+.\github\standards.ps1 -Offline                  # file checks only, no GitHub calls at all
+.\github\standards.ps1 -Apply                    # also fix what can safely be fixed
+```
+
+The report lists, per repo, each row it doesn't meet yet (`GAP` for a *must*, `should` for a recommendation), then **By concern**: for each row, the repos that still miss it, which is the to-do list for a bulk change. Rows marked `manual` (a desktop check, say) are named once at the end. It is saved to `_backups\standards-report.txt`.
+
+How it checks:
+
+- **Files** (the licence, `AGENTS.md`, the hub link, the manifest) are read from the backup mirrors in `_backups`, so they cost GitHub nothing. Refresh the mirrors first (`sync-all` or `backup-repos`) to check today's state; a repo with no mirror yet is skipped and listed under **Needs you**.
+- **Settings** (*Allow auto-merge*, squash, delete branches, the *Protect main* ruleset, Pages) are read from GitHub: two calls per repo, with a 2 to 5 second pause between them.
+- **The hub's own lists** (the card on `index.html`, `shared/apps.json`, the `apply-ruleset` repo lists) are read from this clone of general.
+
+What `-Apply` (`--apply`) does, and nothing more:
+
+- **Repo settings and the ruleset:** runs `apply-ruleset` for repos that miss them (at most 5 repos per run, `-MaxSettings`).
+- **Backups:** makes the first mirror for a repo that has none.
+- **File fixes:** for the rows whose *Fix* column names one (the MIT `LICENSE`, the README *License* section, `CLAUDE.md`, a starter `AGENTS.md`, the manifest `id`), it makes the change in a scratch clone of the mirror, pushes one branch per repo (`standards/<date>`), opens **one small pull request** and turns on auto-merge (squash), as *Merging pull requests* describes. At most **2 pull requests per run** (`-MaxPRs`); the rest wait for the next run. A repo whose earlier `standards/…` branch is still open is skipped until that one is merged.
+- Everything else (the theme switch, the shared look, Drive sign-in) needs a person or an agent working in that app, so it stays in the report.
+
+It keeps the same manners as *Syncing every project*: one repo at a time, a random 5 to 15 second pause before every write, at least 60 minutes between `-Apply` runs (`-MinInterval`), and a full stop on any 403 or 429 that also starts sync-all's cool-down (they share `_backups\sync-state.txt`).
+
+To add a standard, add its section here and its row to `CHECKLIST.md` in the same change. The *Check* column is a tiny language the scripts read: `file A,B` (any of these paths exists), `grep REGEX` (the app's own `.html`, `.js`, `.css` and manifest files match), `grep:PATHS REGEX` (these files or folders match), `hub-file` and `hub-grep:PATH` (the same, in general), `setting NAME` (a GitHub repo setting is true), `ruleset NAME`, `pages`, `mirror`, `clone` and `manual`. `{repo}` stands for the repo's name. A new automatic fix needs code in both scripts; a new check usually doesn't.
+
 ## Shared look
 
-Fitness Coach, Skating Mentor, Nutrition Helper, Special Trip Planner, Photo Timeline, Project Tracker, Study Buddy and Mind Palace (and the hub) share one set of colors, fonts and components. The canonical copy is [`shared/theme.css`](shared/theme.css). Each app inlines it between the `Shared look` and `end shared look` comments and only overrides the `--accent`, `--accent-ink` and `--accent-soft` values after it:
+Fitness Coach, Skating Mentor, Nutrition Helper, Special Trip Planner, Photo Timeline, Project Tracker, Study Buddy, Mind Palace, Dance Floor, Wardrobe and Mixmaster (and the hub) share one set of colors, fonts and components. The canonical copy is [`shared/theme.css`](shared/theme.css). Each app inlines it between the `Shared look` and `end shared look` comments and only overrides the `--accent`, `--accent-ink` and `--accent-soft` values after it:
 
 | App | Light accent | Dark accent |
 | --- | --- | --- |
@@ -335,6 +408,9 @@ Fitness Coach, Skating Mentor, Nutrition Helper, Special Trip Planner, Photo Tim
 | Project Tracker | `#2e7d32` green | `#6fd39a` |
 | Study Buddy | `#0b7285` cyan | `#5fd0e4` |
 | Mind Palace | `#9a6700` amber | `#f2c14e` |
+| Dance Floor | `#a21caf` fuchsia | `#e879f9` |
+| Wardrobe | `#475569` slate | `#a5b4c8` |
+| Mixmaster | `#5d7a0f` chartreuse | `#b8d957` |
 
 VoiceTrainer has its own type and panel styles but follows the same token names for `--bg`, `--ink`, `--muted`, `--line` and `--accent`.
 
@@ -343,6 +419,6 @@ Conventions the apps already share:
 - Light and dark themes with the shared theme switch (see *Light and dark themes* above).
 - Phone-first layout: `viewport-fit=cover`, safe-area insets on sticky headers and sheets, 16px minimum side gutter.
 - User data in the browser with optional Google Drive sync, as *User data* above describes.
-- No sign-up; each app is a static page served by GitHub Pages from its `main` branch.
+- No sign-up; each app is a static page served by GitHub Pages, deployed from its `main` branch by the workflow in *Version and build info*.
 
 When you change the shared look, update `shared/theme.css` here and the inlined copy in each app together.

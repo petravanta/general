@@ -29,6 +29,9 @@
 .app.project{--app:#2e7d32;--app-soft:#dcefdc}
 .app.study{--app:#0b7285;--app-soft:#d7eef2}
 .app.mind{--app:#9a6700;--app-soft:#f6ecd2}
+.app.dance{--app:#a21caf;--app-soft:#f7e4f9}
+.app.wardrobe{--app:#475569;--app-soft:#e5e9ef}
+.app.mixmaster{--app:#5d7a0f;--app-soft:#edf3db}
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]) .app.fitness{--app:#9d95ff;--app-soft:#25224d}
   :root:not([data-theme="light"]) .app.skating{--app:#f0679f;--app-soft:#3d1a2a}
@@ -38,7 +41,10 @@
   :root:not([data-theme="light"]) .app.photo{--app:#bb94ff;--app-soft:#2a1d40}
   :root:not([data-theme="light"]) .app.project{--app:#6fd39a;--app-soft:#143224}
   :root:not([data-theme="light"]) .app.study{--app:#5fd0e4;--app-soft:#0f2f36}
-  :root:not([data-theme="light"]) .app.mind{--app:#f2c14e;--app-soft:#33280f}}
+  :root:not([data-theme="light"]) .app.mind{--app:#f2c14e;--app-soft:#33280f}
+  :root:not([data-theme="light"]) .app.dance{--app:#e879f9;--app-soft:#33173a}
+  :root:not([data-theme="light"]) .app.wardrobe{--app:#a5b4c8;--app-soft:#222b36}
+  :root:not([data-theme="light"]) .app.mixmaster{--app:#b8d957;--app-soft:#252f10}}
 :root[data-theme="dark"] .app.fitness{--app:#9d95ff;--app-soft:#25224d}
 :root[data-theme="dark"] .app.skating{--app:#f0679f;--app-soft:#3d1a2a}
 :root[data-theme="dark"] .app.voice{--app:#9aa6ff;--app-soft:#1e2447}
@@ -48,6 +54,9 @@
 :root[data-theme="dark"] .app.project{--app:#6fd39a;--app-soft:#143224}
 :root[data-theme="dark"] .app.study{--app:#5fd0e4;--app-soft:#0f2f36}
 :root[data-theme="dark"] .app.mind{--app:#f2c14e;--app-soft:#33280f}
+:root[data-theme="dark"] .app.dance{--app:#e879f9;--app-soft:#33173a}
+:root[data-theme="dark"] .app.wardrobe{--app:#a5b4c8;--app-soft:#222b36}
+:root[data-theme="dark"] .app.mixmaster{--app:#b8d957;--app-soft:#252f10}
 
 .topbar{padding-block:14px}
 .theme-slot{margin-left:auto;display:flex}
@@ -146,6 +155,24 @@ footer a{color:var(--muted)}
       <p>Mind maps you arrange by dragging ideas around, with an outline of the same map beside it that you can edit, reorder and indent.</p>
       <div class="links"><span class="open" aria-hidden="true">Open →</span><a class="src" href="https://github.com/petravanta/mind-palace">Source</a></div>
     </li>
+    <li class="app dance">
+      <div class="icon"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="12" r="9" fill="var(--app)"/><path d="M7 12h18M16 3v18M9.5 6.5c3.5 2.2 9.5 2.2 13 0M9.5 17.5c3.5-2.2 9.5-2.2 13 0" stroke="var(--app-soft)" stroke-width="1.5" fill="none"/><path d="M16 21v3M9 29.5l3-4.5M23 29.5l-3-4.5" stroke="var(--ink)" stroke-width="2.4" stroke-linecap="round"/></svg></div>
+      <h2><a href="https://petravanta.github.io/dance-floor/">Dance Floor</a></h2>
+      <p>A friendly primer on basic moves for goth, industrial and rave nights, with short how-to cues and a beat to count along to.</p>
+      <div class="links"><span class="open" aria-hidden="true">Open →</span><a class="src" href="https://github.com/petravanta/dance-floor">Source</a></div>
+    </li>
+    <li class="app wardrobe">
+      <div class="icon"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 6.5a2.6 2.6 0 1 1 2.6 2.6c-1 0-2.6.9-2.6 2.4v1.2L4.4 21.5a1.6 1.6 0 0 0 1 2.9h21.2a1.6 1.6 0 0 0 1-2.9L16 12.7" fill="var(--app-soft)" stroke="var(--app)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <h2><a href="https://petravanta.github.io/wardrobe/">Wardrobe</a></h2>
+      <p>A catalogue of the clothes you own, outfits you put together and what you wore, kept in an open file in your own Google Drive.</p>
+      <div class="links"><span class="open" aria-hidden="true">Open →</span><a class="src" href="https://github.com/petravanta/wardrobe">Source</a></div>
+    </li>
+    <li class="app mixmaster">
+      <div class="icon"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M4 6h24L18 17.5V25h5v2.5H9V25h5v-7.5z" fill="var(--app)"/><circle cx="22.5" cy="9.5" r="2.6" fill="var(--app-soft)"/></svg></div>
+      <h2><a href="https://petravanta.github.io/mixmaster/">Mixmaster</a></h2>
+      <p>Cocktails ranked by what's in your bar, nudging you toward the opened, aging and one-recipe bottles that most need using up.</p>
+      <div class="links"><span class="open" aria-hidden="true">Open →</span><a class="src" href="https://github.com/petravanta/mixmaster">Source</a></div>
+    </li>
   </ul>
 </main>
 
@@ -153,6 +180,7 @@ footer a{color:var(--muted)}
   Shared standards for these apps live in <a href="https://github.com/petravanta/general">petravanta/general</a>.
 </footer>
 <script src="shared/theme-switch.js" defer></script>
+<script src="shared/version-footer.js" defer></script>
 <script>if('serviceWorker' in navigator&&/^(petravanta\.github\.io|localhost|127\.0\.0\.1)$/.test(location.hostname))navigator.serviceWorker.register('sw.js').catch(function(){})</script>
 </body>
 </html>

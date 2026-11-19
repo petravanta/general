@@ -11,3 +11,6 @@ photo-timeline
 project-tracker
 study-buddy
 mind-palace
+dance-floor
+wardrobe
+mixmaster
