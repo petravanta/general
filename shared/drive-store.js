@@ -143,7 +143,8 @@ function DriveStore(o){
     if(waiting) return 'Saving to Google Drive…';
     return 'Saved to Google Drive'+(S.last?' · '+S.last.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}):'');
   }
-  return {load,save,flush,refresh,signIn,signOut,status,live,
+  // folder(): the id of petravanta/<App name>/, made if missing, for anything else the app saves to Drive (Google Docs, photos)
+  return {load,save,flush,refresh,signIn,signOut,status,live,folder:home,
     get data(){return S.data}, get known(){return S.known}, get configured(){return !!o.clientId}, get file(){return o.file},
     get needsTap(){return !!S.data&&!live()}};
 }
