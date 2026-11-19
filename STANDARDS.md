@@ -104,7 +104,7 @@ These are static pages with no server, so Google gives them no refresh token: a 
 - **Open without waiting for Google.** The app opens on the browser's copy and keeps saving changes there; the first tap after the hour reconnects, merges Drive's copy in, then writes. Never put a "Reconnect" screen in front of data the browser already has.
 - **Sign out forgets, doesn't revoke.** Signing out removes this browser's token. Revoking would cut off every app and every device that uses the same Google permission; people can remove it at myaccount.google.com/permissions.
 
-`shared/drive-store.js` does all of this, the folders included, for an app whose data is one JSON file (Fitness Coach, VoiceTrainer, Study Buddy and Mind Palace inline it). Skating Mentor, Nutrition Helper and Photo Timeline have their own Drive code and use `google-token.js` for the sign-in.
+`shared/drive-store.js` does all of this, the folders included (its `folder()` gives the app folder's id for other files, such as Mind Palace's Google Docs), for an app whose data is one JSON file (Fitness Coach, VoiceTrainer, Study Buddy and Mind Palace inline it). Skating Mentor, Nutrition Helper and Photo Timeline have their own Drive code and use `google-token.js` for the sign-in.
 
 ### Shape
 
@@ -222,7 +222,7 @@ Add two things:
    <script src="https://petravanta.github.io/general/shared/version-footer.js" defer></script>
    ```
 
-   [`shared/version-footer.js`](shared/version-footer.js) reads `version.json` next to the page and adds a `<footer>` at the end of `<body>`, styled with the app's `--muted`, `--line`, `--ink` and `--accent` tokens, so it follows light and dark themes and respects the phone's safe-area insets. An app with a fixed bottom bar adds an empty `<div data-version-footer></div>` where the line should go instead (for example at the end of its scrolling content or settings), so the bar doesn't cover it. The info is also on `window.APP_BUILD` for the app's own error messages.
+   [`shared/version-footer.js`](shared/version-footer.js) reads `version.json` next to the page and adds a `<footer>` at the end of `<body>`, styled with the app's `--muted`, `--line`, `--ink` and `--accent` tokens, so it follows light and dark themes and respects the phone's safe-area insets. An app with a fixed bottom bar adds an empty `<div data-version-footer></div>` where the line should go instead (for example after its scrolling content), so the bar doesn't cover it. The script also fills such a `<div>` when the app adds it later, so it can sit in a settings drawer; a full-screen app that shows the line only there (Mind Palace) adds `<meta name="version-footer" content="placed">` to `<head>` so no footer is added to the page. The info is also on `window.APP_BUILD` for the app's own error messages.
 
 2. **The deploy workflow**, so `version.json` gets stamped: copy [`github/workflows/pages.yml`](github/workflows/pages.yml) to `.github/workflows/pages.yml` in the app. It deploys the repo to GitHub Pages on every push to `main` and writes `commit`, `built` and `repo` into `version.json` on the way (keeping any `version` already there). Then switch the repo's Pages source to GitHub Actions: `./github/apply-ruleset.sh <repo>` (or `.ps1`) does that for every repo that has the workflow, or by hand **Settings → Pages → Source → GitHub Actions**. The workflow checks the source first, so landing it before the switch is harmless: it stops early and Pages keeps deploying from the branch.
 

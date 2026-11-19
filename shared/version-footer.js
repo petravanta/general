@@ -14,8 +14,10 @@
    If version.json is missing (not stamped yet, a local file, a claude.ai Artifact), it falls back to the page's
    Last-Modified date and says "unstamped", so the footer is never empty.
 
-   The line goes into a [data-version-footer] element if the page has one (use that when the app has a fixed
-   bottom bar, so the line isn't hidden behind it), otherwise into a <footer> added at the end of <body>.
+   The line goes into every [data-version-footer] element on the page, including ones added later (a settings drawer
+   the app renders on open). Use one when the app has a fixed bottom bar, so the line isn't hidden behind it. Without
+   one, a <footer> is added at the end of <body>. A full-screen app that only shows the line in a drawer adds
+   <meta name="version-footer" content="placed"> to <head> so no <footer> is added.
    Styled with the app's own --muted / --line / --accent tokens, so it follows light and dark themes.
    Also sets window.APP_BUILD to the info it found, for the app's own error reports. */
 (function () {
@@ -72,11 +74,23 @@
 
   function render(b) {
     window.APP_BUILD = b;
-    var host = document.querySelector('[data-version-footer]');
-    if (!host) {
-      host = document.createElement('footer');
-      document.body.appendChild(host);
+    var hosts = document.querySelectorAll('[data-version-footer]');
+    if (!hosts.length && !document.querySelector('meta[name="version-footer"][content="placed"]')) {
+      var f = document.createElement('footer');
+      f.setAttribute('data-version-footer', '');
+      document.body.appendChild(f);
     }
+    fillAll(b);
+    // Fill hosts the app adds later (a drawer rendered on open)
+    if (window.MutationObserver) new MutationObserver(function () { fillAll(b); }).observe(document.body, { childList: true, subtree: true });
+  }
+
+  function fillAll(b) {
+    var hosts = document.querySelectorAll('[data-version-footer]:not(.version-footer)');
+    for (var i = 0; i < hosts.length; i++) fill(b, hosts[i]);
+  }
+
+  function fill(b, host) {
     host.classList.add('version-footer');
     host.setAttribute('aria-label', 'Version and build info');
 
