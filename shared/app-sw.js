@@ -15,6 +15,7 @@ var CACHE = 'app-shell-' + new URL(SCOPE).pathname;
 var SHARED = [
   'https://petravanta.github.io/general/shared/hub-link.js',
   'https://petravanta.github.io/general/shared/theme-switch.js',
+  'https://petravanta.github.io/general/shared/version-footer.js',
   'https://petravanta.github.io/general/shared/apps.json'
 ];
 
