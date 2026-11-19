@@ -27,7 +27,7 @@ Add two things to the app's HTML:
 ## Adding a new app
 
 1. Publish it on GitHub Pages under `petravanta.github.io/<repo>/`.
-2. Add the back link (above), the theme switch (below) and the install files (*Installing on a phone*), follow *Built-in knowledge* for its content, and *User data* for what people save.
+2. Add the back link (above), the theme switch (below), the install files (*Installing on a phone*) and the version footer with its deploy workflow (*Version and build info*), follow *Built-in knowledge* for its content, and *User data* for what people save.
 3. Apply the *Protect main* ruleset and the repo settings for *Merging pull requests*: `.\github\apply-ruleset.ps1 <repo>` (or `./github/apply-ruleset.sh <repo>`).
 4. Add the MIT licence: copy [`LICENSE`](LICENSE) into the repo root as is (see *License*).
 5. Back it up: run `.\github\backup-repos.ps1 <repo>` (or `./github/backup-repos.sh <repo>`) once so its mirror exists from day one (*Backups*). After that the regular run picks it up by itself, because the script backs up every repo petravanta owns. Keep its working clone under `F:\Dev\petravantaapps` so `sync-all` checks it too (*Syncing every project*).
@@ -91,7 +91,7 @@ Everything a person saves belongs to them: it stays in their browser and, if the
 ### Where it lives
 
 - The browser keeps the working copy in `localStorage`.
-- **Google Drive sync** is optional. Each app keeps one JSON file, `<App name> data.json`, in the user's own Drive, using the `drive.file` scope (the app sees only the file it created) and the shared OAuth client that allows `https://petravanta.github.io`. It saves a few seconds after each change, and merges with the browser copy on connect and whenever the app comes back into view.
+- **Google Drive sync** is optional. Each app keeps one JSON file, `<App name> data.json`, in the user's own Drive, in a folder per app: `petravanta/<App name>/<App name> data.json`. Anything else an app saves to Drive (photos, exports) goes in the same app folder. The `petravanta` folder is shared by all the apps (they use one OAuth client, so each sees the folder whichever app made it). A file saved before folders existed, in the root of My Drive, is **moved** (not copied) into the app's folder once, on the first connect, so its id stays the same and other devices carry on. Apps use the `drive.file` scope (they see only files and folders they created) and the shared OAuth client that allows `https://petravanta.github.io`. It saves a few seconds after each change, and merges with the browser copy on connect and whenever the app comes back into view.
 - **Export backup** downloads the whole document as JSON, and **Import backup** merges one back in. Imports from other apps (a Fitbod CSV, a MacroFactor export) are read in the browser and become ordinary records.
 
 ### Staying connected to Google Drive
@@ -104,7 +104,7 @@ These are static pages with no server, so Google gives them no refresh token: a 
 - **Open without waiting for Google.** The app opens on the browser's copy and keeps saving changes there; the first tap after the hour reconnects, merges Drive's copy in, then writes. Never put a "Reconnect" screen in front of data the browser already has.
 - **Sign out forgets, doesn't revoke.** Signing out removes this browser's token. Revoking would cut off every app and every device that uses the same Google permission; people can remove it at myaccount.google.com/permissions.
 
-`shared/drive-store.js` does all of this for an app whose data is one JSON file (Fitness Coach, VoiceTrainer, Study Buddy and Mind Palace inline it). Skating Mentor, Nutrition Helper and Photo Timeline have their own Drive code and use `google-token.js` for the sign-in.
+`shared/drive-store.js` does all of this, the folders included, for an app whose data is one JSON file (Fitness Coach, VoiceTrainer, Study Buddy and Mind Palace inline it). Skating Mentor, Nutrition Helper and Photo Timeline have their own Drive code and use `google-token.js` for the sign-in.
 
 ### Shape
 
@@ -204,6 +204,29 @@ Optional: **shortcuts** in the manifest for the one or two things people open th
 An app with a build step (VoiceTrainer) keeps these files in `pwa/`, adds the head tags to its standalone page only, and copies `pwa/*` next to the page when it deploys.
 
 All apps and the hub follow this. Fitness Coach and Nutrition Helper have their own `sw.js` that predates the shared worker and does the same job.
+
+## Version and build info
+
+Every app shows which build is running in a small line at the very bottom of the page, so a bug report or a screenshot says exactly what was deployed:
+
+> v1.4.0 · `a1b2c3d` · built 11 Nov 2026, 09:23 · **Copy debug info**
+
+- The short commit links to that commit on GitHub. **Copy debug info** copies the app, version, commit, build time, page URL, browser, screen, theme, service-worker and online state as plain text, ready to paste into an issue or a chat with a coding agent.
+- The version (`v1.4.0`) is optional. An app that wants one keeps `{ "version": "1.4.0" }` in a `version.json` at its root and bumps it by hand; the commit and build time are always stamped.
+
+Add two things:
+
+1. **The script**, just before `</body>`, after `hub-link.js`:
+
+   ```html
+   <script src="https://petravanta.github.io/general/shared/version-footer.js" defer></script>
+   ```
+
+   [`shared/version-footer.js`](shared/version-footer.js) reads `version.json` next to the page and adds a `<footer>` at the end of `<body>`, styled with the app's `--muted`, `--line`, `--ink` and `--accent` tokens, so it follows light and dark themes and respects the phone's safe-area insets. An app with a fixed bottom bar adds an empty `<div data-version-footer></div>` where the line should go instead (for example at the end of its scrolling content or settings), so the bar doesn't cover it. The info is also on `window.APP_BUILD` for the app's own error messages.
+
+2. **The deploy workflow**, so `version.json` gets stamped: copy [`github/workflows/pages.yml`](github/workflows/pages.yml) to `.github/workflows/pages.yml` in the app. It deploys the repo to GitHub Pages on every push to `main` and writes `commit`, `built` and `repo` into `version.json` on the way (keeping any `version` already there). Then switch the repo's Pages source to GitHub Actions: `./github/apply-ruleset.sh <repo>` (or `.ps1`) does that for every repo that has the workflow, or by hand **Settings → Pages → Source → GitHub Actions**. The workflow checks the source first, so landing it before the switch is harmless: it stops early and Pages keeps deploying from the branch.
+
+Until both are in place the footer still shows, with the page's last-modified date and the word *unstamped*, so a missing stamp is visible rather than silent. An app with a build step (VoiceTrainer) adds the same stamp to its own deploy workflow instead of copying this one.
 
 ## Notes for coding agents
 
@@ -396,6 +419,6 @@ Conventions the apps already share:
 - Light and dark themes with the shared theme switch (see *Light and dark themes* above).
 - Phone-first layout: `viewport-fit=cover`, safe-area insets on sticky headers and sheets, 16px minimum side gutter.
 - User data in the browser with optional Google Drive sync, as *User data* above describes.
-- No sign-up; each app is a static page served by GitHub Pages from its `main` branch.
+- No sign-up; each app is a static page served by GitHub Pages, deployed from its `main` branch by the workflow in *Version and build info*.
 
 When you change the shared look, update `shared/theme.css` here and the inlined copy in each app together.

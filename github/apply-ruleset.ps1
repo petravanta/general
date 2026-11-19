@@ -1,6 +1,8 @@
 <#
 Applies main-branch-ruleset.json (no force pushes, no deleting main) and repo-settings.json
-(auto-merge on, squash merges, delete branches after merge) to the hub and every app repo.
+(auto-merge on, squash merges, delete branches after merge) to the hub and every app repo, and switches
+GitHub Pages to deploy from Actions in repos that have .github/workflows/pages.yml (STANDARDS.md,
+"Version and build info"); repos without that workflow keep deploying from the branch.
 The Windows twin of apply-ruleset.sh; see STANDARDS.md, "Protecting main".
 Run it once from your own machine with the GitHub CLI signed in as petravanta (gh auth login):
 
@@ -54,5 +56,15 @@ foreach ($r in $Repos) {
   } else {
     Invoke-Gh @('api', '-X', 'POST', "repos/$owner/$r/rulesets", '--input', $ruleset) | Out-Null
     if (-not $DryRun) { Write-Host "added $r" }
+  }
+  # Only repos that already have the Pages workflow, so nothing stops deploying. A missing file is not an error here
+  # (5.1 turns a native command's stderr into errors, so relax 'Stop' just for this probe).
+  $ErrorActionPreference = 'Continue'
+  & gh api "repos/$owner/$r/contents/.github/workflows/pages.yml" *> $null
+  $hasPages = ($LASTEXITCODE -eq 0)
+  $ErrorActionPreference = 'Stop'
+  if ($hasPages) {
+    Invoke-Gh @('api', '-X', 'PUT', "repos/$owner/$r/pages", '-f', 'build_type=workflow') | Out-Null
+    if (-not $DryRun) { Write-Host "pages from actions $r" }
   }
 }
