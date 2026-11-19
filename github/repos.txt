@@ -1,6 +1,6 @@
 # Every petravanta repo, one per line. backup-repos uses this list (plus any mirrors it already has and the
 # origins of clones under F:\Dev\petravantaapps) when the GitHub CLI isn't installed or signed in.
-# Add a line here when you add a new app (STANDARDS.md, "Adding a new app", step 4).
+# Add a line here when you add a new app (STANDARDS.md, "Adding a new app", step 5).
 general
 fitness-coach
 skating-mentor
