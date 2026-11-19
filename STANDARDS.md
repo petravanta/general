@@ -226,7 +226,7 @@ Add two things:
 
 2. **The deploy workflow**, so `version.json` gets stamped: copy [`github/workflows/pages.yml`](github/workflows/pages.yml) to `.github/workflows/pages.yml` in the app. It deploys the repo to GitHub Pages on every push to `main` and writes `commit`, `built` and `repo` into `version.json` on the way (keeping any `version` already there). Then switch the repo's Pages source to GitHub Actions: `./github/apply-ruleset.sh <repo>` (or `.ps1`) does that for every repo that has the workflow, or by hand **Settings → Pages → Source → GitHub Actions**. The workflow checks the source first, so landing it before the switch is harmless: it stops early and Pages keeps deploying from the branch.
 
-Until both are in place the footer still shows, with the page's last-modified date and the word *unstamped*, so a missing stamp is visible rather than silent. An app with a build step (VoiceTrainer) adds the same stamp to its own deploy workflow instead of copying this one.
+Until both are in place the footer still shows, with the page's last-modified date and the word *unstamped*, so a missing stamp is visible rather than silent. VoiceTrainer, which has a build step, keeps its own build line instead: its deploy workflow stamps `version.json` and the page offers a reload when a newer build is out.
 
 ## Notes for coding agents
 

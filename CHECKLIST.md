@@ -57,7 +57,7 @@ When you add a standard, add its row here in the same change. Keep the *Check* c
 | shared-look | must | apps !voicetrainer | `grep Shared look` | - | `shared/theme.css` inlined between the *Shared look* markers ([Shared look](STANDARDS.md#shared-look)) |
 | phone-layout | must | all | `grep viewport-fit=cover` | - | Phone-first: `viewport-fit=cover`, safe-area insets, 16px gutters |
 | desktop-layout | must | all | `manual` | - | Checked on a desktop-width window too, light and dark |
-| version-footer | planned | all | `grep shared/version-footer\.js` | - | Loads `version-footer.js`: version, commit and build time at the bottom of the page ([Version and build info](STANDARDS.md#version-and-build-info)) |
+| version-footer | planned | all !voicetrainer | `grep shared/version-footer\.js` | - | Loads `version-footer.js`: version, commit and build time at the bottom of the page ([Version and build info](STANDARDS.md#version-and-build-info)) |
 | version-stamp | planned | all !voicetrainer | `file .github/workflows/pages.yml` | - | Pages workflow stamps `version.json` on deploy; Pages source set to GitHub Actions |
 
 ## Installing on a phone
