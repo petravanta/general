@@ -1,0 +1,55 @@
+# Deploys the app to GitHub Pages and stamps version.json with the commit and build time.
+# Copy to .github/workflows/pages.yml in each app. See STANDARDS.md, "Version and build info".
+# Deploys only once Settings → Pages → Source is "GitHub Actions" (./github/apply-ruleset.sh switches it for repos
+# that have this file). Until then it checks, says so in the log and stops, and Pages keeps deploying from the branch.
+name: Deploy to Pages
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Is Pages set to deploy from Actions?
+        id: mode
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          bt=$(gh api "repos/$GITHUB_REPOSITORY/pages" --jq .build_type 2>/dev/null || echo none)
+          echo "Pages source: $bt"
+          if [ "$bt" = workflow ]; then echo "on=yes" >> "$GITHUB_OUTPUT"; else echo "::notice::Pages deploys from the branch, so this run stops here. Run ./github/apply-ruleset.sh to switch it."; fi
+      - if: steps.mode.outputs.on == 'yes'
+        uses: actions/checkout@v4
+      - name: Stamp version.json
+        if: steps.mode.outputs.on == 'yes'
+        run: |
+          node -e '
+            const fs = require("fs");
+            let v = {};
+            try { v = JSON.parse(fs.readFileSync("version.json", "utf8")); } catch (e) {}
+            v.commit = process.env.GITHUB_SHA;
+            v.built = new Date().toISOString().replace(/\.\d+Z$/, "Z");
+            v.repo = process.env.GITHUB_REPOSITORY;
+            fs.writeFileSync("version.json", JSON.stringify(v, null, 2) + "\n");
+            console.log(v);
+          '
+      - if: steps.mode.outputs.on == 'yes'
+        uses: actions/configure-pages@v5
+      - if: steps.mode.outputs.on == 'yes'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+      - id: deployment
+        if: steps.mode.outputs.on == 'yes'
+        uses: actions/deploy-pages@v4
