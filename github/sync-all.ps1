@@ -31,6 +31,9 @@ $owner = 'petravanta'
 if (-not $Dest) { $Dest = Join-Path $Root '_backups' }
 if ($OpenPRs -and -not $Push) { Write-Host '-OpenPRs goes with -Push.'; exit 64 }
 if ($Push -and $SkipBackup) { Write-Host '-Push needs the backup step (it tells us what GitHub already has).'; exit 64 }
+if ($OpenPRs -and -not (Get-Command gh -ErrorAction SilentlyContinue)) {
+  Write-Host '-OpenPRs needs the GitHub CLI: winget install --id GitHub.cli, then open a new terminal and run gh auth login.'; exit 64
+}
 $delayLo, $delayHi = $Delay -split '-' | ForEach-Object { [int]$_ }
 $stateFile = Join-Path $Dest 'sync-state.txt'
 $reportFile = Join-Path $Dest 'sync-report.txt'
@@ -149,7 +152,12 @@ function Check-Clone([string]$d) {
   $name = ''
   if ($url -match "github\.com[:/]$owner/([^/]+?)(\.git)?$") { $name = $Matches[1] }
   Say "== $(if ($name) { $name } else { Split-Path $d -Leaf })  ($rel)"
-  if (-not $url) { Need $rel 'no remote at all, so nothing here is on GitHub'; Say ''; return }
+  if (-not $url) {
+    Need $rel 'no remote at all, so nothing here is on GitHub'
+    Info "to put it on GitHub (private): cd `"$d`"; gh repo create $owner/$(Split-Path $d -Leaf) --private --source . --push"
+    Info "then add it to github\repos.txt. Not done for you, because creating a repo is your call."
+    Say ''; return
+  }
   if (-not $name) { Info "origin is $url (not $owner's), so only checking, never pushing" }
   $mirror = Join-Path $Dest "$name.git"
 

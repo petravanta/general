@@ -1,6 +1,8 @@
 <#
 Keeps a full local mirror (every branch and tag) of every petravanta GitHub repo. See STANDARDS.md, "Backups".
-Run it on your own machine with the GitHub CLI signed in (gh auth login) and git on the PATH.
+Run it on your own machine with git on the PATH. With the GitHub CLI signed in (gh auth login) it finds every repo
+by itself; without it, it backs up the repos in github\repos.txt, the mirrors it already has, and the origins of
+your clones under the folder above -Dest, using plain git.
 
   .\github\backup-repos.ps1                          # mirror new repos, refresh existing ones
   .\github\backup-repos.ps1 -DryRun                  # show what it would do, change nothing
@@ -52,22 +54,49 @@ function Invoke-GitHub([string[]]$argv) {
   return ($rc -eq 0)
 }
 
-# The one API call. Its output is also kept as repos.json (description, visibility, homepage, default branch).
-$errFile = [IO.Path]::GetTempFileName()
-$ErrorActionPreference = 'Continue'
-$json = gh repo list $owner --limit 500 --json name,description,visibility,homepageUrl,defaultBranchRef,isArchived,isFork,pushedAt 2>$errFile
-$listed = ($LASTEXITCODE -eq 0 -and $json)
-$ErrorActionPreference = 'Stop'
-if (-not $listed) {
-  $err = Get-Content -Raw $errFile; Write-Host $err
-  if ($err -match $limitRe) { Write-Host 'STOPPED: GitHub answered with a limit. Not retrying.'; exit 2 }
-  throw "No repos listed for $owner. Is gh signed in?"
+# Without gh: repos.txt, the mirrors already here, and the origins of local clones. Plain git, no API.
+function Get-RepoNamesWithoutGh {
+  $names = New-Object System.Collections.Generic.HashSet[string]
+  $txt = Join-Path $PSScriptRoot 'repos.txt'
+  if (Test-Path $txt) { Get-Content $txt | ForEach-Object { $n = ($_ -replace '#.*', '').Trim(); if ($n) { [void]$names.Add($n) } } }
+  if (Test-Path $Dest) { Get-ChildItem -Path $Dest -Filter '*.git' -Directory | ForEach-Object { [void]$names.Add($_.BaseName) } }
+  $clones = Split-Path $Dest -Parent
+  Get-ChildItem -Path $clones -Filter '.git' -Force -Recurse -Depth 3 -ErrorAction SilentlyContinue |
+    Where-Object { $_.FullName -notmatch '[\\/](_backups|node_modules)[\\/]' } | ForEach-Object {
+      $url = git -C (Split-Path $_.FullName -Parent) config --get remote.origin.url 2>$null
+      if ($url -match "github\.com[:/]$owner/([^/]+?)(\.git)?$") { [void]$names.Add($Matches[1]) }
+    }
+  return @($names | Sort-Object | ForEach-Object { [pscustomobject]@{ name = $_ } })
 }
-$list = $json | ConvertFrom-Json
+
+# The one API call. Its output is also kept as repos.json (description, visibility, homepage, default branch).
+$json = $null
+if (Get-Command gh -ErrorAction SilentlyContinue) {
+  $errFile = [IO.Path]::GetTempFileName()
+  $ErrorActionPreference = 'Continue'
+  $json = gh repo list $owner --limit 500 --json name,description,visibility,homepageUrl,defaultBranchRef,isArchived,isFork,pushedAt 2>$errFile
+  $listed = ($LASTEXITCODE -eq 0 -and $json)
+  $ErrorActionPreference = 'Stop'
+  if (-not $listed) {
+    $err = Get-Content -Raw $errFile; Write-Host $err
+    if ($err -match $limitRe) { Write-Host 'STOPPED: GitHub answered with a limit. Not retrying.'; exit 2 }
+    Write-Host 'The GitHub CLI is installed but not signed in. Run: gh auth login'
+    $json = $null
+  }
+} else {
+  Write-Host 'The GitHub CLI (gh) is not installed, so new repos on GitHub are not found automatically.'
+  Write-Host '  To add it: winget install --id GitHub.cli   then open a new terminal and run: gh auth login'
+}
+if ($json) { $list = $json | ConvertFrom-Json }
+else {
+  $list = Get-RepoNamesWithoutGh
+  if (-not $list) { throw "No repos to back up: add names to $(Join-Path $PSScriptRoot 'repos.txt'), or install gh." }
+  Write-Host "Using plain git for $($list.Count) repos from repos.txt, existing mirrors and local clones."
+}
 
 if (-not $DryRun) {
   New-Item -ItemType Directory -Force -Path $Dest | Out-Null
-  $json | Set-Content -Encoding utf8 (Join-Path $Dest 'repos.json')
+  if ($json) { $json | Set-Content -Encoding utf8 (Join-Path $Dest 'repos.json') }
   if ($Bundle) { New-Item -ItemType Directory -Force -Path $Bundle | Out-Null }
 }
 
