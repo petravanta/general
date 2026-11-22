@@ -6,6 +6,8 @@ How to read a row:
 
 - **Level:** `must` is part of the standard today, `should` is recommended (or not every app can follow it yet), `planned` is agreed but not rolled out, so it is reported without counting as a gap.
 - **Applies to:** `all` repos, the `hub` (general) only, the `apps` only, or apps that have a feature: `data` (a `data/` folder), `drive` (Google sign-in), `photos` (a photo picker). `!repo` leaves one repo out.
+
+Optional patterns in [`PATTERNS.md`](PATTERNS.md) and the agents' working style have no rows: they aren't required.
 - **Check:** how the script tests it. `manual` means a person has to look.
 - **Fix:** what `-Apply` (`--apply`) does about a gap. `-` means it only reports it.
 
@@ -22,6 +24,8 @@ When you add a standard, add its row here in the same change. Keep the *Check* c
 | agents-md | must | apps | `file AGENTS.md` | agents-md | `AGENTS.md` with the app-specific notes ([Notes for coding agents](STANDARDS.md#notes-for-coding-agents)) |
 | agents-link | must | apps | `grep:AGENTS.md general/blob/main/STANDARDS\.md` | - | `AGENTS.md` links back to STANDARDS.md |
 | claude-md | must | apps | `grep:CLAUDE.md @AGENTS\.md` | claude-md | One-line `CLAUDE.md` containing `@AGENTS.md` |
+| agents-checked | should | apps | `grep:AGENTS.md Checked against General as of [0-9]{4}-[0-9]{2}-[0-9]{2}` | - | `AGENTS.md` says when the app was last checked against these standards ([Notes for coding agents](STANDARDS.md#notes-for-coding-agents)) |
+| changelog | must | hub | `file CHANGELOG.md` | - | `CHANGELOG.md` with one dated line per standards or shared-code change ([Pasted shared code](STANDARDS.md#pasted-shared-code)) |
 
 ## GitHub settings and safety copies
 
@@ -56,9 +60,26 @@ When you add a standard, add its row here in the same change. Keep the *Check* c
 | dark-tokens | must | all | `grep :root\[data-theme="dark"\]` | - | Color tokens with dark values, also under `:root[data-theme="dark"]` |
 | shared-look | must | apps !voicetrainer | `grep Shared look` | - | `shared/theme.css` inlined between the *Shared look* markers ([Shared look](STANDARDS.md#shared-look)) |
 | phone-layout | must | all | `grep viewport-fit=cover` | - | Phone-first: `viewport-fit=cover`, safe-area insets, 16px gutters |
-| desktop-layout | must | all | `manual` | - | Checked on a desktop-width window too, light and dark |
+| desktop-layout | must | all | `manual` | - | Checked at desktop width and at 390 px, light and dark ([Testing changes](STANDARDS.md#testing-changes)) |
+| test-data | must | all | `manual` | - | Tests use throwaway `zz-` data in a separate browser profile, never a person's real data |
 | version-footer | must | all !voicetrainer | `grep shared/version-footer\.js` | - | Loads `version-footer.js`: version, commit and build time at the bottom of the page ([Version and build info](STANDARDS.md#version-and-build-info)) |
 | version-stamp | must | all !voicetrainer | `file .github/workflows/pages.yml` | - | Pages workflow stamps `version.json` on deploy; Pages source set to GitHub Actions |
+
+## Shared code
+
+| ID | Level | Applies to | Check | Fix | What |
+| --- | --- | --- | --- | --- | --- |
+| shared-current | must | apps | `shared` | - | Pasted shared code (`google-token.js`, `drive-store.js`, `local-day.js`, `theme.css`) matches `general/shared/`; run `sync-shared` ([Pasted shared code](STANDARDS.md#pasted-shared-code)) |
+
+## Forms and dates
+
+| ID | Level | Applies to | Check | Fix | What |
+| --- | --- | --- | --- | --- | --- |
+| local-day | should | apps | `nogrep toISOString\(\)\.slice\(0, ?10\)` | - | Days are local (`LocalDay` from `local-day.js`), never `toISOString().slice(0, 10)` ([Forms and dates](STANDARDS.md#forms-and-dates)) |
+| overlay-close | must | apps | `manual` | - | Every overlay closes with a visible Close button, Esc and the phone's Back gesture |
+| date-fields | should | apps | `manual` | - | Native date picker saving `YYYY-MM-DD`; older partial dates kept until a full one is picked |
+| repeat-values | should | apps | `manual` | - | Free-text fields that repeat suggest values already used, most used first |
+| thumbs-contain | should | photos | `manual` | - | Image thumbnails fit (`object-fit: contain`) rather than crop |
 
 ## Installing on a phone
 
@@ -96,3 +117,7 @@ When you add a standard, add its row here in the same change. Keep the *Check* c
 | ID | Level | Applies to | Check | Fix | What |
 | --- | --- | --- | --- | --- | --- |
 | photo-drop | must | photos | `grep dragover` | - | Photos can be dropped anywhere on the page ([Adding photos](STANDARDS.md#adding-photos)) |
+| images-not-drive | must | photos | `manual` | - | Images never go to Google Drive: Google Photos or the device only ([Images](STANDARDS.md#images)) |
+| photos-description | must | photos | `manual` | - | Photos uploaded to Google Photos have a description naming the app |
+| photos-scope | must | photos | `manual` | - | Google Photos scopes asked for separately, never added to `google-token.js` |
+| photos-archive-help | should | photos | `manual` | - | Help explains archiving the app's Google Photos album by hand |

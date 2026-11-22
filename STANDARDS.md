@@ -2,7 +2,7 @@
 
 These apply to every app linked from the hub at **https://petravanta.github.io/general/**: [Fitness Coach](https://github.com/petravanta/fitness-coach), [Skating Mentor](https://github.com/petravanta/skating-mentor), [VoiceTrainer](https://github.com/petravanta/voicetrainer), [Nutrition Helper](https://github.com/petravanta/nutrition-helper), [Special Trip Planner](https://github.com/petravanta/special-trip-planner), [Photo Timeline](https://github.com/petravanta/photo-timeline), [Project Tracker](https://github.com/petravanta/project-tracker), [Study Buddy](https://github.com/petravanta/study-buddy), [Mind Palace](https://github.com/petravanta/mind-palace), [Dance Floor](https://github.com/petravanta/dance-floor), [Wardrobe](https://github.com/petravanta/wardrobe) and [Mixmaster](https://github.com/petravanta/mixmaster).
 
-[`CHECKLIST.md`](CHECKLIST.md) lists every concern below as one row each (what, for which repos, how it's checked), and *Checking every project* explains the script that checks them all.
+[`CHECKLIST.md`](CHECKLIST.md) lists every concern below as one row each (what, for which repos, how it's checked), and *Checking every project* explains the script that checks them all. [`CHANGELOG.md`](CHANGELOG.md) says what changed here and when, so an app can catch up from the date it was last checked. [`PATTERNS.md`](PATTERNS.md) holds optional patterns that one app worked out and others can pick up when they need them; they aren't required.
 
 ## Back link to the hub
 
@@ -32,7 +32,7 @@ Add two things to the app's HTML:
 4. Add the MIT licence: copy [`LICENSE`](LICENSE) into the repo root as is (see *License*).
 5. Back it up: run `.\github\backup-repos.ps1 <repo>` (or `./github/backup-repos.sh <repo>`) once so its mirror exists from day one (*Backups*), and add its name to [`github/repos.txt`](github/repos.txt). After that the regular run picks it up by itself, because the script backs up every repo petravanta owns. Keep its working clone under `F:\Dev\petravantaapps` so `sync-all` checks it too (*Syncing every project*).
 6. Add a card for it to [`index.html`](index.html): copy an existing `<li class="app …">`, set its name, link, one-line description and icon, and add a `--app` / `--app-soft` accent pair (light and dark) in the `<style>` block. Also add the app to [`shared/apps.json`](shared/apps.json) (id, name, url and the same light and dark accents) so it shows in every app's menu, and add the repo to the repo list in `github/apply-ruleset.ps1` and `github/apply-ruleset.sh`.
-7. Check it: `.\github\standards.ps1 <repo>` (or `./github/standards.sh <repo>`) should report no gaps (*Checking every project*).
+7. Check it: `.\github\standards.ps1 <repo>` (or `./github/standards.sh <repo>`) should report no gaps (*Checking every project*), and end its `AGENTS.md` with `Checked against General as of <today's date>` (*Pasted shared code*).
 
 ## License
 
@@ -86,19 +86,29 @@ Fitness Coach (exercises, sports, equipment), Skating Mentor (skills), Study Bud
 
 ## User data
 
-Everything a person saves belongs to them: it stays in their browser and, if they choose, in their own Google Drive. It never goes to a server of ours or into a repo.
+Everything a person saves belongs to them: it stays in their browser and, if they choose, in their own Google Drive, or for images their own Google Photos (see *Images*). It never goes to a server of ours or into a repo.
 
 ### Where it lives
 
 - The browser keeps the working copy in `localStorage`.
-- **Google Drive sync** is optional. Each app keeps one JSON file, `<App name> data.json`, in the user's own Drive, in a folder per app: `petravanta/<App name>/<App name> data.json`. Anything else an app saves to Drive (photos, exports) goes in the same app folder. The `petravanta` folder is shared by all the apps (they use one OAuth client, so each sees the folder whichever app made it). A file saved before folders existed, in the root of My Drive, is **moved** (not copied) into the app's folder once, on the first connect, so its id stays the same and other devices carry on. Apps use the `drive.file` scope (they see only files and folders they created) and the shared OAuth client that allows `https://petravanta.github.io`. It saves a few seconds after each change, and merges with the browser copy on connect and whenever the app comes back into view.
+- **Google Drive sync** is optional. Each app keeps one JSON file, `<App name> data.json`, in the user's own Drive, in a folder per app: `petravanta/<App name>/<App name> data.json`. Anything else an app saves to Drive (exports, documents) goes in the same app folder. Images are the exception: they never go to Drive (see *Images* below). The `petravanta` folder is shared by all the apps (they use one OAuth client, so each sees the folder whichever app made it). A file saved before folders existed, in the root of My Drive, is **moved** (not copied) into the app's folder once, on the first connect, so its id stays the same and other devices carry on. Apps use the `drive.file` scope (they see only files and folders they created) and the shared OAuth client that allows `https://petravanta.github.io`. It saves a few seconds after each change, and merges with the browser copy on connect and whenever the app comes back into view.
 - **Export backup** downloads the whole document as JSON, and **Import backup** merges one back in. Imports from other apps (a Fitbod CSV, a MacroFactor export) are read in the browser and become ordinary records.
+
+### Images
+
+Storage on Google Drive is the standard for everything people save **except images**. Photos and pictures don't belong in a Drive folder full of JSON, they fill people's storage, and Google Photos is where people already look for them. So:
+
+- **Images never go to Google Drive.** An image is either in the person's Google Photos or only on the device.
+- **Uploaded to Google Photos, it says where it came from.** Every photo an app uploads carries a description naming the app and what it is, such as `Wardrobe app · cut-out of Black tee`, so it makes sense when someone finds it in their library.
+- **Images the app can make again stay on the device.** Crops, cut-outs, thumbnails and other images the app can regenerate from an original may live only in the browser's IndexedDB. An image the app can't make again and keeps only on the device goes into **Export backup** with everything else.
+- **Photos permissions are asked for on their own.** Google Photos scopes are never added to the shared `google-token.js`, which stays `drive.file` only: an app that uses Google Photos asks for its scopes separately, when people first use that feature, so the other apps keep their one small Drive permission.
+- **The app can't archive, people can.** Google's API gives apps no way to archive a photo, so an app's album shows in the person's photo timeline. The app's help says so and explains that they can open the album in Google Photos and choose **Archive** on its photos to keep them out of the timeline.
 
 ### Staying connected to Google Drive
 
 These are static pages with no server, so Google gives them no refresh token: a Drive sign-in lasts an hour, and getting a new one opens Google's window, which browsers only allow right after a tap. That can't be made silent, but every app does the following so it is rare and costs at most one tap:
 
-- **One sign-in for all the apps.** They share an origin and an OAuth client, so a token from one works in all. `shared/google-token.js` (inline it, between its marker comments) keeps it under `localStorage` key `petravanta.google`, one per Google account, and tells open tabs when it changes. Reconnecting in one app reconnects every app on that browser, open tabs included.
+- **One sign-in for all the apps.** They share an origin and an OAuth client, so a token from one works in all. `shared/google-token.js` (paste it in between its marker comments, see *Pasted shared code*) keeps it under `localStorage` key `petravanta.google`, one per Google account, and tells open tabs when it changes. Reconnecting in one app reconnects every app on that browser, open tabs included.
 - **The account as a hint.** After connecting, the app remembers the account's email and passes it as `login_hint`, so Google's window closes by itself rather than asking which account. A first connect suggests the account the other apps already use.
 - **Renew on any tap.** Once the token has under ten minutes left, the next tap anywhere renews it. Load Google's script when the page opens, not on the tap, or the browser may block the window.
 - **Open without waiting for Google.** The app opens on the browser's copy and keeps saving changes there; the first tap after the hour reconnects, merges Drive's copy in, then writes. Never put a "Reconnect" screen in front of data the browser already has.
@@ -197,6 +207,8 @@ An app needs four things:
 
    The shared worker fetches pages and the app's own files network-first, so an update shows the next time the app opens online, falls back to the cached copy offline, keeps Google Fonts cached, and leaves everything else (Google sign-in, Drive, Photos, food databases) to the network. User data is never cached by it.
 
+   An app split into files (see *Splitting a large app* in [PATTERNS.md](PATTERNS.md)) lists its `css/` and `js/` files in `APP_SHELL` too, so it opens offline. An app that runs a model on the device may cache the model files itself, as *On-device machine learning* in PATTERNS.md describes; that is the one allowed exception to leaving other sites' files to the network.
+
 When Chrome is ready to install an app, the **All apps** menu from `hub-link.js` also shows an **Install app** item.
 
 Optional: **shortcuts** in the manifest for the one or two things people open the app to do (long-press the icon), as `./?do=<action>` URLs. The page reads `do` on load, does it, and removes it from the address with `history.replaceState` so a reload doesn't repeat it. Nutrition Helper has these.
@@ -222,7 +234,7 @@ Add two things:
    <script src="https://petravanta.github.io/general/shared/version-footer.js" defer></script>
    ```
 
-   [`shared/version-footer.js`](shared/version-footer.js) reads `version.json` next to the page and adds a `<footer>` at the end of `<body>`, styled with the app's `--muted`, `--line`, `--ink` and `--accent` tokens, so it follows light and dark themes and respects the phone's safe-area insets. An app with a fixed bottom bar adds an empty `<div data-version-footer></div>` where the line should go instead (for example after its scrolling content), so the bar doesn't cover it. The script also fills such a `<div>` when the app adds it later, so it can sit in a settings drawer; a full-screen app that shows the line only there (Mind Palace) adds `<meta name="version-footer" content="placed">` to `<head>` so no footer is added to the page. The info is also on `window.APP_BUILD` for the app's own error messages.
+   In an app split into files it goes in `index.html`. [`shared/version-footer.js`](shared/version-footer.js) reads `version.json` next to the page and adds a `<footer>` at the end of `<body>`, styled with the app's `--muted`, `--line`, `--ink` and `--accent` tokens, so it follows light and dark themes and respects the phone's safe-area insets. An app with a fixed bottom bar adds an empty `<div data-version-footer></div>` where the line should go instead (for example after its scrolling content), so the bar doesn't cover it. The script also fills such a `<div>` when the app adds it later, so it can sit in a settings drawer; a full-screen app that shows the line only there (Mind Palace) adds `<meta name="version-footer" content="placed">` to `<head>` so no footer is added to the page. The info is also on `window.APP_BUILD` for the app's own error messages.
 
 2. **The deploy workflow**, so `version.json` gets stamped: copy [`github/workflows/pages.yml`](github/workflows/pages.yml) to `.github/workflows/pages.yml` in the app. It deploys the repo to GitHub Pages on every push to `main` and writes `commit`, `built` and `repo` into `version.json` on the way (keeping any `version` already there). Then switch the repo's Pages source to GitHub Actions: `./github/apply-ruleset.sh <repo>` (or `.ps1`) does that for every repo that has the workflow, or by hand **Settings → Pages → Source → GitHub Actions**. The workflow checks the source first, so landing it before the switch is harmless: it stops early and Pages keeps deploying from the branch.
 
@@ -233,6 +245,31 @@ Until both are in place the footer still shows, with the page's last-modified da
 Each app has an `AGENTS.md` that links back here and lists only what's specific to that app, plus a one-line `CLAUDE.md` containing `@AGENTS.md` so Claude Code reads the same notes.
 
 When an agent opens a pull request, it turns on auto-merge (squash) in the same step, as *Merging pull requests* describes, unless the PR needs petravanta's decision, in which case it opens a draft and says what needs deciding.
+
+`AGENTS.md` ends with a line saying which version of these standards the app was last brought in line with, `Checked against General as of 2026-11-22`. An agent picking up the app reads [`CHANGELOG.md`](CHANGELOG.md) from that date on to see what it needs to catch up with, and updates the date when it has.
+
+### Working style
+
+These are habits rather than rules, so they have no checklist row:
+
+- **Queue first, build in batches.** A new ask goes into the app's queue (a list in its `AGENTS.md` or an issue) rather than being built straight away. When the owner says go, the queued items are built together.
+- **One fresh session per batch, grouped by area.** Each batch starts from a clean session and the latest `main`, and holds related items (all the closet-screen changes, say), so the context stays small and the pull request reads as one change.
+- **Test at the end of the batch, report once.** Test the whole batch as *Testing changes* describes, then send one report for it: what was built, what was tested, what's left in the queue.
+
+## Testing changes
+
+How an agent (or a person) checks a change before it's merged:
+
+- **Visual changes** are checked at a desktop width (about 1280 px) and at a phone width of **390 px**, each in the **light and dark** themes: four looks. **Other changes** are checked at both widths in one theme.
+- **Throwaway test data.** Anything a test creates has an obvious id or name prefix, such as `zz-`, and lives in a separate browser profile or the in-app browser, never the person's everyday one. Remove it afterwards. Never read, change or delete a person's real data to test something, and never connect a test profile to their Google Drive or Photos.
+- **When there's no browser to look through** (the in-app browser pane is hidden or unavailable), use [`tools/screenshot.mjs`](tools/screenshot.mjs). It needs Node 22 or newer and an installed Chrome or Edge, nothing from npm: it starts the browser headless with its own throwaway profile and drives it over the DevTools protocol.
+
+  ```sh
+  node tools/screenshot.mjs go http://localhost:8000/ size 390x844 theme dark shot phone-dark.png
+  node tools/screenshot.mjs go http://localhost:8000/ size 1280x800 theme light shot desktop-light.png full
+  ```
+
+  Its steps are `go URL`, `size WxH`, `theme light|dark`, `js EXPRESSION` (run code in the page and print the result), `shot FILE [full]`, `touch X Y`, `drag X1 Y1 X2 Y2` and `wait MS`, run in order. It can also be imported from a test script (`open()` returns the same steps as functions).
 
 ## Merging pull requests
 
@@ -390,7 +427,26 @@ What `-Apply` (`--apply`) does, and nothing more:
 
 It keeps the same manners as *Syncing every project*: one repo at a time, a random 5 to 15 second pause before every write, at least 60 minutes between `-Apply` runs (`-MinInterval`), and a full stop on any 403 or 429 that also starts sync-all's cool-down (they share `_backups\sync-state.txt`).
 
-To add a standard, add its section here and its row to `CHECKLIST.md` in the same change. The *Check* column is a tiny language the scripts read: `file A,B` (any of these paths exists), `grep REGEX` (the app's own `.html`, `.js`, `.css` and manifest files match), `grep:PATHS REGEX` (these files or folders match), `hub-file` and `hub-grep:PATH` (the same, in general), `setting NAME` (a GitHub repo setting is true), `ruleset NAME`, `pages`, `mirror`, `clone` and `manual`. `{repo}` stands for the repo's name. A new automatic fix needs code in both scripts; a new check usually doesn't.
+To add a standard, add its section here and its row to `CHECKLIST.md` in the same change. The *Check* column is a tiny language the scripts read: `file A,B` (any of these paths exists), `grep REGEX` (the app's own `.html`, `.js`, `.css` and manifest files match), `grep:PATHS REGEX` (these files or folders match), `nogrep REGEX` and `nogrep:PATHS REGEX` (the same files must *not* match), `shared` (every pasted shared block is current, as `sync-shared -Mirrors` reports), `hub-file` and `hub-grep:PATH` (the same, in general), `setting NAME` (a GitHub repo setting is true), `ruleset NAME`, `pages`, `mirror`, `clone` and `manual`. `{repo}` stands for the repo's name. A new automatic fix needs code in both scripts; a new check usually doesn't.
+
+## Pasted shared code
+
+Most shared code is loaded by URL (`hub-link.js`, `theme-switch.js`, `version-footer.js`, `app-sw.js`), so a change here reaches every app by itself. A few pieces can't be: [`shared/google-token.js`](shared/google-token.js), [`shared/drive-store.js`](shared/drive-store.js), [`shared/local-day.js`](shared/local-day.js) and [`shared/theme.css`](shared/theme.css) are pasted into each app between their marker comments, and [`shared/blocks.txt`](shared/blocks.txt) lists them with their markers. Pasted copies drift, so:
+
+- **After any change to `shared/`,** add a line to [`CHANGELOG.md`](CHANGELOG.md) and run `sync-shared` to see which apps now have an old copy.
+- [`github/sync-shared.ps1`](github/sync-shared.ps1) (Windows) and [`github/sync-shared.sh`](github/sync-shared.sh) (Git Bash, macOS, Linux) look at every app clone under `F:\Dev\petravantaapps` and report each pasted block that differs from `shared/` here (ignoring its opening comment, indentation and blank lines). They never touch GitHub.
+
+  ```powershell
+  .\github\sync-shared.ps1               # report every app; changes nothing
+  .\github\sync-shared.ps1 wardrobe -Diff  # one app, showing the lines that differ
+  .\github\sync-shared.ps1 -Apply        # replace the old blocks in your clones' files
+  .\github\sync-shared.ps1 -Mirrors      # check what's on GitHub (the backup mirrors) instead of your clones
+  ```
+
+  Each stale copy is reported as **old** (it matches an earlier version of the file here, so replacing it is safe) or **edited** (it matches no version: the app changed lines inside the markers). `-Apply` (`--apply`) replaces old copies in the working files only. It leaves edited ones alone until the app's own lines are moved after the closing marker (or into `shared/` here), unless `-Force` says to drop them; it skips a file with uncommitted changes; and it never commits or pushes. Review the change, test the app and open its pull request as usual. Telling old from edited needs this repo's history, so run it from a full clone of general, not a shallow one.
+- An app split into files (see *Splitting a large app* in [PATTERNS.md](PATTERNS.md)) keeps whole copies as `js/shared/<file>` instead of pasting them; sync-shared compares and replaces those whole.
+- An app never edits its pasted copy. Its own additions (extra CSS rules, say) go after the closing marker; a change every app needs goes into `shared/` here first, then out to every app.
+- The *shared-current* checklist row runs the same comparison against the backup mirrors, so `standards` reports stale copies too.
 
 ## Shared look
 
@@ -421,4 +477,14 @@ Conventions the apps already share:
 - User data in the browser with optional Google Drive sync, as *User data* above describes.
 - No sign-up; each app is a static page served by GitHub Pages, deployed from its `main` branch by the workflow in *Version and build info*.
 
-When you change the shared look, update `shared/theme.css` here and the inlined copy in each app together.
+When you change the shared look, update `shared/theme.css` here, then bring each app's inlined copy up to date with `sync-shared` (*Pasted shared code*).
+
+## Forms and dates
+
+Small things every app gets right the same way:
+
+- **Days are local.** A date someone picks or logs is a day on their own calendar. Get it with `LocalDay.today()` or `LocalDay.of(date)` from [`shared/local-day.js`](shared/local-day.js) (pasted in like the other shared code). Never use `toISOString().slice(0, 10)` for it: that is the UTC date, so in the evening, west of Greenwich, it is already tomorrow.
+- **Date fields** use the browser's native date picker (`<input type="date">`) and save `YYYY-MM-DD`. A value saved earlier in a shorter form (just `2025-03`, say) is shown as it is and kept until the person picks a full date; the app never rewrites it on its own.
+- **Repeat values are suggested.** A free-text field whose values repeat (brands, sizes, tags, places) suggests the values already used, most used first (a `<datalist>` is enough), and still takes a new one.
+- **Every overlay can be closed three ways:** a visible **Close** button, the **Esc** key, and the phone's **Back** gesture (push a history entry when the overlay opens, close it on `popstate`). That goes for close-ups, sheets, drawers and dialogs.
+- **Thumbnails fit, they don't crop.** Image thumbnails use `object-fit: contain`, so the whole picture shows.

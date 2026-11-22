@@ -184,12 +184,14 @@ run_check() {
   [[ $kind == *:* ]] && { paths=${kind#*:}; kind=${kind%%:*}; }
   case "$kind" in
     manual) res=manual; return ;;
-    file|grep) have_mirror "$r" || { res="skip:no backup yet"; return; } ;;
+    file|grep|nogrep|shared) have_mirror "$r" || { res="skip:no backup yet"; return; } ;;
     setting|ruleset|pages) read_settings "$r" || { res="skip:settings not read"; return; } ;;
   esac
   case "$kind" in
     file) in_mirror_file "$r" "$rest" ;;
     grep) in_mirror_grep "$r" "$paths" "$rest" ;;
+    nogrep) ! in_mirror_grep "$r" "$paths" "$rest" ;;
+    shared) "$here/sync-shared.sh" --mirrors --quiet --dest "$dest" "$r" >/dev/null 2>&1 ;;
     hub-file) [ -e "$hub/${rest//\{repo\}/$r}" ] ;;
     hub-grep) grep -qE -e "${rest//\{repo\}/$r}" "$hub/$paths" 2>/dev/null ;;
     setting) [ "${setting[$r.$rest]-}" = true ] ;;
@@ -224,6 +226,8 @@ fix_files() {  # repo, workdir, fix ids...
 Follow the shared standards in https://github.com/petravanta/general/blob/main/STANDARDS.md (hub link, theme switch, shared look, installing on a phone, user data). This file only adds what's specific to $name.
 
 - (Add what an agent needs to know about $name here: how to run it, where its data lives, what never to rename.)
+
+Checked against General as of $(date +%Y-%m-%d).
 EOF
         ;;
       manifest-id)
