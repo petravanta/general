@@ -220,11 +220,13 @@ function Run-Check([string]$r, $row) {
   $paths = ''
   if ($kind -match '^([a-z-]+):(.*)$') { $kind = $Matches[1]; $paths = $Matches[2] }
   if ($kind -eq 'manual') { return 'manual' }
-  if ($kind -in @('file', 'grep') -and -not (Have-Mirror $r)) { return 'skip' }
+  if ($kind -in @('file', 'grep', 'nogrep', 'shared') -and -not (Have-Mirror $r)) { return 'skip' }
   if ($kind -in @('setting', 'ruleset', 'pages') -and -not (Read-Settings $r)) { return 'skip' }
   $okay = switch ($kind) {
     'file' { Mirror-Has $r $rest }
     'grep' { Mirror-Grep $r $paths $rest }
+    'nogrep' { -not (Mirror-Grep $r $paths $rest) }
+    'shared' { & (Join-Path $PSScriptRoot 'sync-shared.ps1') -Mirrors -Quiet -Dest $Dest $r *> $null; $LASTEXITCODE -eq 0 }
     'hub-file' { Test-Path (Join-Path $hub $rest.Replace('{repo}', $r)) }
     'hub-grep' { $t = Get-Content -Raw -Encoding utf8 (Join-Path $hub $paths) -ErrorAction SilentlyContinue; [bool]($t -and $t -cmatch ('(?m)' + $rest.Replace('{repo}', $r))) }
     'setting' { [bool]$settings[$r][$rest] }
@@ -266,7 +268,8 @@ function Fix-Files([string]$r, [string]$w, [string[]]$fixes) {
         Write-Text (Join-Path $w 'AGENTS.md') (@(
           '# Notes for coding agents', '',
           "Follow the shared standards in https://github.com/petravanta/general/blob/main/STANDARDS.md (hub link, theme switch, shared look, installing on a phone, user data). This file only adds what's specific to $name.", '',
-          "- (Add what an agent needs to know about $name here: how to run it, where its data lives, what never to rename.)", ''
+          "- (Add what an agent needs to know about $name here: how to run it, where its data lives, what never to rename.)", '',
+          "Checked against General as of $(Get-Date -Format 'yyyy-MM-dd').", ''
         ) -join "`n")
       }
       'manifest-id' {
