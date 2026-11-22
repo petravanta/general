@@ -77,6 +77,8 @@ When you add a standard, add its row here in the same change. Keep the *Check* c
 | --- | --- | --- | --- | --- | --- |
 | local-day | should | apps | `nogrep toISOString\(\)\.slice\(0, ?10\)` | - | Days are local (`LocalDay` from `local-day.js`), never `toISOString().slice(0, 10)` ([Forms and dates](STANDARDS.md#forms-and-dates)) |
 | overlay-close | must | apps | `manual` | - | Every overlay closes with a visible Close button, Esc and the phone's Back gesture |
+| back-stack | planned | apps | `grep general/shared/back-stack\.js` | - | Loads `back-stack.js` by URL, so Back closes the view in front ([Back button](STANDARDS.md#back-button)); apps with no view over another can skip it |
+| back-closes-front | planned | apps | `manual` | - | Back closes each dialog, sheet, drawer, menu, close-up and detail screen; Back at the root leaves the app; Close and Esc go through `layer.close()` |
 | date-fields | should | apps | `manual` | - | Native date picker saving `YYYY-MM-DD`; older partial dates kept until a full one is picked |
 | repeat-values | should | apps | `manual` | - | Free-text fields that repeat suggest values already used, most used first |
 | thumbs-contain | should | photos | `manual` | - | Image thumbnails fit (`object-fit: contain`) rather than crop |
