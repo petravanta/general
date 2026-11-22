@@ -114,7 +114,11 @@
     var home =
       '<li><a class="hub-home" href="' + esc(HUB) + '">' + icon + '<span>Home</span></a></li>' +
       '<li class="hub-sep" role="separator"></li>';
-    var items = apps.map(function (app) {
+    // Alphabetical by display name, whatever order apps.json is in, so new apps land in place.
+    var sorted = apps.slice().sort(function (a, b) {
+      return String(a.name || '').localeCompare(String(b.name || ''), undefined, { sensitivity: 'base' });
+    });
+    var items = sorted.map(function (app) {
       return '<li><a href="' + esc(app.url) + '" data-accent="' + esc(app.accent || '') + '" data-accent-dark="' +
         esc(app.accentDark || app.accent || '') + '"' + (here(app.url) ? ' aria-current="page"' : '') + '>' +
         '<span class="hub-dot" aria-hidden="true"></span><span>' + esc(app.name) + '</span></a></li>';
