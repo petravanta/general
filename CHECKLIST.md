@@ -109,6 +109,7 @@ When you add a standard, add its row here in the same change. Keep the *Check* c
 | drive-scope | must | drive | `grep drive\.file` | - | Only the `drive.file` scope ([User data](STANDARDS.md#user-data)) |
 | drive-folders | must | drive | `grep google-apps\.folder` | - | Saves under `petravanta/<App name>/` and moves older root files there once ([Where it lives](STANDARDS.md#where-it-lives)) |
 | shared-token | must | drive | `grep petravanta\.google` | - | Shared sign-in via `google-token.js` ([Staying connected](STANDARDS.md#staying-connected-to-google-drive)) |
+| drive-backoff | must | drive | `grep Retry-After` | - | Backs off and retries on Google's rate limits and 5xx, and the status line names the problem with Google's status and reason ([When Google Drive says no](STANDARDS.md#when-google-drive-says-no)) |
 | export-import | must | all | `manual` | - | Export and Import backup of everything people save |
 | data-shape | should | drive | `manual` | - | One document with `version`, records with `id` and `u`, a `deleted` list, merged without loss |
 
