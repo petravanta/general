@@ -12,7 +12,7 @@ function DriveStore(o){
   const API='https://www.googleapis.com';
   const get=k=>{try{return JSON.parse(localStorage.getItem(o.key+'.'+k)||'null')}catch(e){return null}};
   const put=(k,v)=>{try{v==null?localStorage.removeItem(o.key+'.'+k):localStorage.setItem(o.key+'.'+k,JSON.stringify(v));return true}catch(e){return false}};
-  const S={token:null,exp:0,email:get('email')||'',fileId:get('file'),folderId:get('folder'),known:!!get('known'),data:null,stale:false,busy:false,err:null,last:null,timer:null,ask:0};
+  const S={problem:null,retry:0,token:null,exp:0,email:get('email')||'',fileId:get('file'),folderId:get('folder'),known:!!get('known'),data:null,stale:false,busy:false,err:null,last:null,timer:null,ask:0};
   // The app's own token from before tokens were shared; good until it runs out
   const t=get('token'); if(t&&t.exp>Date.now()){S.token=t.token;S.exp=t.exp} put('token',null);
   if(S.known){const c=get('copy')||get('pending'); if(c){S.data=c; S.stale=true}}
@@ -30,13 +30,57 @@ function DriveStore(o){
     S.token=r.token; S.exp=r.exp; S.known=true; put('known',true);
     if(r.email&&r.email!==S.email){S.email=r.email; put('email',r.email)}
   }
-  async function call(path,opt={}){
-    if(!live()) throw {code:'expired'};
-    let r; try{r=await fetch(API+path,{...opt,headers:{...(opt.headers||{}),Authorization:'Bearer '+S.token}})}catch(e){throw {code:'offline'}}
-    if(r.status===401){S.token=null; S.exp=0; GoogleToken.forget(S.email); throw {code:'expired'}}
-    if(!r.ok) throw {code:'http',status:r.status};
-    return r;
+  // Google asks apps to back off when it is busy: 429, a 403 whose reason is a rate limit, or a 5xx. Wait and try again,
+  // longer each time with a random spread (Google's advice), up to 4 tries, then leave it to flush()'s later retry.
+  const wait=ms=>new Promise(r=>setTimeout(r,ms));
+  // A failed response as {code:'http', status, reason: Google's reason (e.g. 'userRateLimitExceeded'), msg: Google's message}
+  async function failure(r){
+    let reason='', msg='';
+    try{const j=(await r.json()).error||{}; reason=((j.errors||[])[0]||{}).reason||j.status||''; msg=j.message||''}catch(e){}
+    return {code:'http',status:r.status,reason,msg};
   }
+  async function call(path,opt={}){
+    for(let n=0;;n++){
+      if(!live()) throw {code:'expired'};
+      let r; try{r=await fetch(API+path,{...opt,headers:{...(opt.headers||{}),Authorization:'Bearer '+S.token}})}catch(e){throw {code:'offline'}}
+      if(r.status===401){S.token=null; S.exp=0; GoogleToken.forget(S.email); throw {code:'expired'}}
+      if(r.ok) return r;
+      const e=await failure(r), k=kind(e);
+      if(n<3&&(k==='busy'||k==='server')){
+        const ra=Number(r.headers.get('Retry-After')), ms=ra>0?Math.min(ra,60)*1000:(2**n)*1000+Math.random()*1000;
+        S.problem=explain(e,ms); note(); await wait(ms); continue;
+      }
+      throw e;
+    }
+  }
+  // What went wrong, in words a person can act on. See STANDARDS.md, "When Google Drive says no".
+  function kind(e){
+    if(!e||e.code==='expired') return null;
+    if(e.code==='offline') return 'offline';
+    const s=e.status, r=e.reason||'';
+    if(/storageQuotaExceeded/.test(r)) return 'full';
+    if(s===429||/rateLimitExceeded|quotaExceeded|dailyLimitExceeded|RESOURCE_EXHAUSTED/i.test(r)) return 'busy';
+    if(s===403) return 'denied';
+    if(s===404) return 'missing';
+    if(s>=500) return 'server';
+    return 'http';
+  }
+  const TEXT={
+    offline:'Offline · changes save to Drive when you’re back online',
+    busy:'Google Drive is busy · trying again by itself',
+    server:'Google Drive had a problem on its side · trying again by itself',
+    full:'Your Google Drive is full · free up space and the app saves again',
+    denied:'Google Drive didn’t allow this · disconnect and connect Google Drive again, and tick the Drive box',
+    missing:'Couldn’t find this app’s file in Google Drive · trying again',
+    http:'Google Drive didn’t accept the change · trying again'};
+  // retryIn: ms until the next try, or 0 when it waits for the person (a tap, a reconnect, the connection coming back)
+  function explain(e,retryIn){
+    const k=kind(e); if(!k) return null;
+    return {kind:k,status:e.status||0,reason:e.reason||'',message:e.msg||'',retrying:retryIn>0,retryAt:retryIn>0?new Date(Date.now()+retryIn):null,at:new Date(),
+      text:TEXT[k]+(e.status?` (${e.status}${e.reason?' '+e.reason:''})`:'')};
+  }
+  // Retried by flush(): every kind except offline (waits for 'online'), full and denied (wait for the person)
+  const AGAIN={busy:1,server:1,missing:1,http:1};
   // Files live in petravanta/<App name>/ in the user's Drive (STANDARDS.md, "Where it lives").
   // Every app shares one OAuth client, so they all see the one petravanta folder whichever app made it.
   const ROOT='petravanta', SUB=o.folder||o.file.replace(/ data\.json$/i,'');
@@ -71,8 +115,11 @@ function DriveStore(o){
   }
   async function read(){const id=await find(); return id?(await call(`/drive/v3/files/${id}?alt=media`)).json():null}
   async function write(data){
-    const body=JSON.stringify({app:o.app,saved:new Date().toISOString(),...data}), id=await find();
-    if(id){await call(`/upload/drive/v3/files/${id}?uploadType=media`,{method:'PATCH',headers:{'Content-Type':'application/json'},body});return}
+    const body=JSON.stringify({app:o.app,saved:new Date().toISOString(),...data}), up=id=>call(`/upload/drive/v3/files/${id}?uploadType=media`,{method:'PATCH',headers:{'Content-Type':'application/json'},body});
+    // The file id is known after the first load: write straight to it, and only look for the file again if Drive says it is gone
+    if(S.fileId){try{await up(S.fileId);return}catch(e){if(!(e.code==='http'&&e.status===404)) throw e; S.fileId=null; put('file',null)}}
+    const id=await find();
+    if(id){await up(id);return}
     const b='b'+Math.random().toString(36).slice(2), meta=JSON.stringify({name:o.file,mimeType:'application/json',parents:[await home()]});
     const j=await (await call('/upload/drive/v3/files?uploadType=multipart&fields=id',{method:'POST',headers:{'Content-Type':'multipart/related; boundary='+b},
       body:`--${b}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${meta}\r\n--${b}\r\nContent-Type: application/json\r\n\r\n${body}\r\n--${b}--`})).json();
@@ -90,8 +137,13 @@ function DriveStore(o){
     clearTimeout(S.timer); if(!S.data||S.busy) return;
     if(!live()){note();return}
     S.busy=true; note();
-    try{await catchUp(); await write(S.data); S.err=null; S.last=new Date(); put('pending',null)}
-    catch(e){S.err=e.code==='expired'?null:e.code==='offline'?'offline':'error'}
+    try{await catchUp(); await write(S.data); S.err=null; S.problem=null; S.last=new Date(); S.retry=0; put('pending',null)}
+    catch(e){
+      S.err=e.code==='expired'?null:e.code==='offline'?'offline':'error';
+      // Drive was busy or failed: try again by itself, 30 s, then 1, 2, 4, up to 5 minutes apart
+      const again=!!AGAIN[kind(e)]; if(again){S.retry=Math.min((S.retry||15000)*2,300000); clearTimeout(S.timer); S.timer=setTimeout(flush,S.retry)}
+      S.problem=explain(e,again?S.retry:0);
+    }
     finally{S.busy=false; note()}
   }
   // Load: Drive's copy, merged with any changes this browser hadn't saved yet. Creates the file on first use.
@@ -103,25 +155,25 @@ function DriveStore(o){
       const remote=await read();
       let data=remote?o.merge(remote,o.empty()):o.empty();
       if(pending) data=o.merge(pending,data);
-      S.data=data; S.stale=false; S.err=null; S.last=new Date(); put('copy',data);
+      S.data=data; S.stale=false; S.err=null; S.problem=null; S.last=new Date(); put('copy',data);
       if(!remote||pending){await write(data); put('pending',null)}
       return data;
     }catch(e){
       // offline with unsaved changes: carry on from them; they go to Drive once the connection is back
-      if(e.code==='offline'&&pending){S.data=o.merge(pending,o.empty()); S.stale=true; S.err='offline'; return S.data}
-      S.err=e.code==='offline'?'offline':e.code==='expired'?null:'error'; throw e;
+      if(e.code==='offline'&&pending){S.data=o.merge(pending,o.empty()); S.stale=true; S.err='offline'; S.problem=explain(e,0); return S.data}
+      S.err=e.code==='offline'?'offline':e.code==='expired'?null:'error'; S.problem=explain(e,0); throw e;
     }finally{S.busy=false; note()}
   }
   // Pick up changes made on another device
   async function refresh(){
     if(!live()||S.busy||!S.data) return false;
-    try{const r=await read(); if(!r) return false; const before=JSON.stringify(S.data); S.data=o.merge(r,S.data); S.stale=false; put('copy',S.data); return JSON.stringify(S.data)!==before}
+    try{const r=await read(); if(!r) return false; const before=JSON.stringify(S.data); S.data=o.merge(r,S.data); S.stale=false; S.problem=null; put('copy',S.data); return JSON.stringify(S.data)!==before}
     catch(e){return false}
   }
   function save(data){S.data=data; put('copy',data); if(!put('pending',data)) {/* storage full or blocked: Drive still gets it */} clearTimeout(S.timer); S.timer=setTimeout(flush,1500); note()}
   function signOut(){
     GoogleToken.forget(S.email);
-    S.token=null; S.exp=0; S.data=null; S.stale=false; S.email=''; ['known','file','folder','moved','pending','copy','email'].forEach(k=>put(k,null)); S.known=false; note();
+    S.token=null; S.exp=0; S.data=null; S.stale=false; S.problem=null; S.email=''; ['known','file','folder','moved','pending','copy','email'].forEach(k=>put(k,null)); S.known=false; note();
   }
   // Tokens last an hour. Renew on a tap when it is close to running out or gone, then save anything waiting.
   document.addEventListener('click',e=>{
@@ -135,16 +187,18 @@ function DriveStore(o){
   window.addEventListener('online',()=>flush());
   function status(){
     if(!S.data) return '';
+    if(S.problem&&S.problem.retrying&&S.busy) return S.problem.text; // backing off inside a save
     if(S.busy) return 'Saving to Google Drive…';
     const waiting=!!get('pending');
-    if(S.err==='offline') return 'Offline · changes save to Drive when you’re back online';
-    if(S.err) return 'Couldn’t reach Google Drive · will retry';
+    if(S.problem&&live()) return S.problem.text;
+    if(S.err==='offline') return TEXT.offline;
     if(!live()) return waiting?'Tap anywhere to save to Google Drive':'Tap anywhere to reconnect Google Drive';
     if(waiting) return 'Saving to Google Drive…';
     return 'Saved to Google Drive'+(S.last?' · '+S.last.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}):'');
   }
   // folder(): the id of petravanta/<App name>/, made if missing, for anything else the app saves to Drive (Google Docs, photos)
-  return {load,save,flush,refresh,signIn,signOut,status,live,folder:home,
+  // problem: null when all is well, else {kind, text, status, reason, message, retrying, retryAt, at} (STANDARDS.md, "When Google Drive says no")
+  return {load,save,flush,refresh,signIn,signOut,status,live,folder:home,explain,get problem(){return S.problem},
     get data(){return S.data}, get known(){return S.known}, get configured(){return !!o.clientId}, get file(){return o.file},
     get needsTap(){return !!S.data&&!live()}};
 }
