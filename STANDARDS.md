@@ -116,6 +116,27 @@ These are static pages with no server, so Google gives them no refresh token: a 
 
 `shared/drive-store.js` does all of this, the folders included (its `folder()` gives the app folder's id for other files, such as Mind Palace's Google Docs), for an app whose data is one JSON file (Fitness Coach, VoiceTrainer, Study Buddy and Mind Palace inline it). Skating Mentor, Nutrition Helper and Photo Timeline have their own Drive code and use `google-token.js` for the sign-in.
 
+### When Google Drive says no
+
+Google throttles busy apps and sometimes fails on its side, so a save can be refused for a while. Every app handles that the same way, and `shared/drive-store.js` does it for the apps that use it:
+
+- **Back off and try again.** A `429`, a `403` whose reason is a rate limit (`userRateLimitExceeded`, `rateLimitExceeded`), or a `5xx` is retried up to 4 times inside the request, waiting 1, 2, then 4 seconds plus a random spread, or what Google's `Retry-After` asks for.
+- **Keep trying by itself.** A save that still fails is tried again 30 seconds later, then 1, 2, 4 and up to every 5 minutes, until it gets through. Offline waits for the connection to come back. A full Drive or a refused permission waits for the person, since trying again can't fix it.
+- **Fewer calls.** Once the app knows its file's id it writes straight to it, and looks for the file again only if Drive answers `404`.
+- **Say what happened.** The status line names the problem in plain words and ends with Google's status and reason, such as `Google Drive is busy · trying again by itself (429 rateLimitExceeded)`, so a screenshot tells us what came back.
+
+The store's `problem` is `null` when all is well, or:
+
+| Field | Meaning |
+|---|---|
+| `kind` | `busy` (rate limit), `server` (Google's side, 5xx), `full` (Drive storage full), `denied` (other 403, usually a missing Drive permission), `missing` (404), `offline`, or `http` (anything else) |
+| `text` | The sentence `status()` shows, ready for the status line |
+| `status`, `reason`, `message` | Google's HTTP status, its reason string and its message, as sent (`0` and empty when offline) |
+| `retrying`, `retryAt` | Whether the app will try again by itself, and when (a `Date`, or `null` when it waits for the person) |
+| `at` | When it happened |
+
+An expired sign-in is not a problem: it is the hour-long token running out, and the next tap renews it. `store.explain(error)` turns an error from the app's own Drive calls into the same shape. Apps with their own Drive code (Skating Mentor, Nutrition Helper, Photo Timeline) should back off and describe errors the same way.
+
 ### Shape
 
 One JSON document per app:
