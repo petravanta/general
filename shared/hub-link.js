@@ -11,7 +11,8 @@
    jump straight from one app to another. If the list can't load, the pill stays a plain link to the hub.
    If an app has no [data-hub-link] element, a slim bar with the link is added at the top of <body>.
    When Chrome offers to install the app (it has a manifest and service worker), the menu also gets an
-   "Install app" item, so people find it without the browser's own menu. */
+   "Install app" item, so people find it without the browser's own menu.
+   When the app also loads shared/back-stack.js (before this script), Back closes the open menu. */
 (function () {
   var HUB = 'https://petravanta.github.io/general/';
   if (location.href.indexOf(HUB) === 0 && !/\/shared\//.test(location.pathname)) return;
@@ -168,9 +169,13 @@
       place();
       if (focusFirst) links()[0].focus();
       document.addEventListener('pointerdown', outside, true);
+      // With shared/back-stack.js on the page, the phone's Back closes the menu instead of leaving the app.
+      if (window.BackStack && !layer) layer = window.BackStack.push(function () { layer = null; close(false); });
     }
 
+    var layer = null;
     function close(refocus) {
+      if (layer) { var l = layer; layer = null; l.close(); }
       if (panel.hidden) return;
       panel.hidden = true;
       btn.setAttribute('aria-expanded', 'false');
