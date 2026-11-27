@@ -39,8 +39,8 @@
     '.hub-menu{position:relative;display:inline-flex;flex:none}' +
     '.hub-menu-panel{position:absolute;top:calc(100% + 6px);left:0;z-index:1000;width:max-content;min-width:220px;' +
     'max-width:calc(100vw - 32px);margin:0;padding:6px;list-style:none;box-sizing:border-box;' +
-    'background:var(--surface,Canvas);color:var(--ink,CanvasText);border:1px solid var(--line,#cdd6db);border-radius:12px;' +
-    'box-shadow:0 10px 30px rgba(0,0,0,.18);font:500 14px/1.3 var(--f-body,var(--font-body,system-ui,-apple-system,"Segoe UI",sans-serif))}' +
+    'background:var(--raised,var(--surface,Canvas));color:var(--ink,CanvasText);border:1px solid var(--line,#cdd6db);border-radius:var(--r-lg,12px);' +
+    'box-shadow:var(--shadow-2,0 10px 30px rgba(0,0,0,.18));font:500 14px/1.3 var(--f-body,var(--font-body,system-ui,-apple-system,"Segoe UI",sans-serif))}' +
     '.hub-menu-panel[hidden]{display:none}' +
     '.hub-menu-panel a{display:flex;align-items:center;gap:10px;padding:10px;border-radius:8px;' +
     'color:inherit;text-decoration:none;min-height:24px;white-space:nowrap}' +

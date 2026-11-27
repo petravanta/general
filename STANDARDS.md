@@ -477,6 +477,17 @@ Conventions the apps already share:
 - User data in the browser with optional Google Drive sync, as *User data* above describes.
 - No sign-up; each app is a static page served by GitHub Pages, deployed from its `main` branch by the workflow in *Version and build info*.
 
+### Nightbloom (the look since 2026-11)
+
+Plum-black nights, bone-white days, one bright accent per app. The live style guide at [`look/`](look/) ([petravanta.github.io/general/look/](https://petravanta.github.io/general/look/)) shows every token and component in both themes, with any app's accent; check a change there first.
+
+- **Tokens.** Colors: `--bg`, `--surface`, `--raised` (drawers, menus), `--sunk`, `--line`, `--ink`, `--muted`, `--faint` (decoration and placeholders only, not body text), the `--lv-*` levels, and status pairs `--ok`/`--ok-soft`, `--warn`/`--warn-soft`, `--danger`/`--danger-soft`. Type sizes `--t-xs` … `--t-2xl`; spacing `--s-1` … `--s-7` (4, 8, 12, 16, 24, 32, 48 px); radii `--r-sm`, `--r`, `--r-lg`; `--tap` (44 px); `--shadow-1`, `--shadow-2`, `--glow`, `--scrim`, `--ease`, `--dur`. Use tokens rather than raw values in app CSS, so the next refresh reaches the app too.
+- **Text contrast.** `--ink` and `--muted` stay at 4.5:1 or better on `--surface` and `--bg` in both themes; so do the status colors on their `-soft` backgrounds.
+- **Status line.** An app that saves anywhere has one status line, `<span class="status" data-state="…">` (or its existing `.save-state` with a `data-state`). `data-state` is `ok`, `saving`, `local` or the Drive store's `problem.kind` (*When Google Drive says no*), and its text is `problem.text`. Problems that wait for the person (`full`, `denied`) also get a `.banner.bad`; `.banner.ok` and `.banner.warn` exist too.
+- **Drill-down screens** start with `<button class="back">`, which closes the view through its `BackStack` layer (*Back button*).
+- **Touch.** On a touch screen, buttons, tabs and fields grow to `--tap` and fields use 16 px text so phones don't zoom in.
+- **Motion** is short and only where something moves in or out (drawers, sheets, toasts); all of it turns off with *reduce motion*.
+
 When you change the shared look, update `shared/theme.css` here, then bring each app's inlined copy up to date with `sync-shared` (*Pasted shared code*).
 
 ## Forms and dates
