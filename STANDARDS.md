@@ -27,7 +27,7 @@ Add two things to the app's HTML:
 ## Adding a new app
 
 1. Publish it on GitHub Pages under `petravanta.github.io/<repo>/`.
-2. Add the back link (above), the theme switch (below), the install files (*Installing on a phone*) and the version footer with its deploy workflow (*Version and build info*), follow *Built-in knowledge* for its content, and *User data* for what people save.
+2. Add the back link (above), the theme switch (below), the install files (*Installing on a phone*) the version footer with its deploy workflow (*Version and build info*) and, once it has any view that opens over another, the back stack (*Back button*), follow *Built-in knowledge* for its content, and *User data* for what people save.
 3. Apply the *Protect main* ruleset and the repo settings for *Merging pull requests*: `.\github\apply-ruleset.ps1 <repo>` (or `./github/apply-ruleset.sh <repo>`).
 4. Add the MIT licence: copy [`LICENSE`](LICENSE) into the repo root as is (see *License*).
 5. Back it up: run `.\github\backup-repos.ps1 <repo>` (or `./github/backup-repos.sh <repo>`) once so its mirror exists from day one (*Backups*), and add its name to [`github/repos.txt`](github/repos.txt). After that the regular run picks it up by itself, because the script backs up every repo petravanta owns. Keep its working clone under `F:\Dev\petravantaapps` so `sync-all` checks it too (*Syncing every project*).
@@ -507,5 +507,39 @@ Small things every app gets right the same way:
 - **Days are local.** A date someone picks or logs is a day on their own calendar. Get it with `LocalDay.today()` or `LocalDay.of(date)` from [`shared/local-day.js`](shared/local-day.js) (pasted in like the other shared code). Never use `toISOString().slice(0, 10)` for it: that is the UTC date, so in the evening, west of Greenwich, it is already tomorrow.
 - **Date fields** use the browser's native date picker (`<input type="date">`) and save `YYYY-MM-DD`. A value saved earlier in a shorter form (just `2025-03`, say) is shown as it is and kept until the person picks a full date; the app never rewrites it on its own.
 - **Repeat values are suggested.** A free-text field whose values repeat (brands, sizes, tags, places) suggests the values already used, most used first (a `<datalist>` is enough), and still takes a new one.
-- **Every overlay can be closed three ways:** a visible **Close** button, the **Esc** key, and the phone's **Back** gesture (push a history entry when the overlay opens, close it on `popstate`). That goes for close-ups, sheets, drawers and dialogs.
+- **Every overlay can be closed three ways:** a visible **Close** button, the **Esc** key, and the phone's **Back** gesture. That goes for close-ups, sheets, drawers and dialogs; *Back button* below says how, with `shared/back-stack.js`.
 - **Thumbnails fit, they don't crop.** Image thumbnails use `object-fit: contain`, so the whole picture shows.
+
+## Back button
+
+The browser's Back button, the phone's Back gesture and a mouse's back button close whatever is in front, not the app. Back leaves the app only from its root view.
+
+**What counts as a view in front:** anything that opens over the app and has its own way to close: dialogs, sheets, drawers, menus (the *All apps* menu too), close-ups of a photo, and drill-down screens such as a detail page opened from a list or a settings sub-page. Not tabs, filters, sorting or scrolling: Back doesn't walk back through those, because they aren't something people "go into". A multi-step form is one view, so Back closes it rather than stepping through it.
+
+**How:** load [`shared/back-stack.js`](shared/back-stack.js) by URL, before `hub-link.js`:
+
+```html
+<script src="https://petravanta.github.io/general/shared/back-stack.js" defer></script>
+<script src="https://petravanta.github.io/general/shared/hub-link.js" defer></script>
+```
+
+Then, when a view opens, push it, and close it through the layer it returns:
+
+```js
+function openItem(item) {
+  render(item); sheet.hidden = false;
+  var layer = BackStack.push(function (reason) { sheet.hidden = true; }, { esc: true });
+  sheet.querySelector('.close').onclick = function () { layer.close(); };
+}
+```
+
+- **One close function.** The function given to `push()` runs exactly once, whichever way the view goes: Back (`'back'`), the app's own `layer.close()` (`'close'`: the Close button, after Save, a tap outside), Esc (`'esc'`) or a view beneath it closing (`'parent'`). Always close through `layer.close()`, never by hiding the view alone, so its history entry goes too and the next Back doesn't land on a stale one.
+- **Esc for free.** `{ esc: true }` makes Esc close the front view. Leave it off where the view handles Esc itself (a native `<dialog>`, whose `close` event then calls `layer.close()`).
+- **Nested views** stack: Back closes the front one only. Closing a view also closes everything opened on top of it.
+- **Unsaved input.** For Back only, the function may return `false` to keep the view open, for example to ask "Discard changes?". The entry is put back.
+- **Never trap people.** Push only when someone opens something (a tap or a key), never on page load, and never at the root view: no "press Back again to exit". Browsers skip entries that no one asked for anyway.
+- **No URL changes.** The script keeps the URL as it is. Views that already have their own URL (a `#/item/42` route) get Back from the browser and don't need it; use one way per view, not both.
+- **Reloads.** After a reload with views open, the page steps back to its root entry, since those views are gone.
+- [`shared/hub-link.js`](shared/hub-link.js) uses it for the *All apps* menu when `back-stack.js` is on the page, and [`shared/app-sw.js`](shared/app-sw.js) keeps it for offline use. It is loaded by URL rather than pasted in, so it isn't part of `sync-shared`.
+
+Check it on a phone (or at 390 px in the in-app browser): open each view, press Back, and the view closes while the app stays; press Back at the root, and the app is left.
