@@ -14,15 +14,19 @@ permissions:
   contents: read
   pages: write
   id-token: write
+# Deploys queue one at a time and are never cancelled half-way (a newer push still replaces one that hasn't
+# started): GitHub's advice for Pages, since a cancelled deploy can leave the site's deployment stuck.
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
+# Two jobs, as in GitHub's own Pages workflows. The artifact list deploy-pages reads lags a moment behind the
+# upload, and asking in the same second as the upload sometimes finds nothing ("No artifacts named github-pages"),
+# which failed real deploys. The job boundary gives it time, and one retry after a pause covers the rest.
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    outputs:
+      on: ${{ steps.mode.outputs.on }}
     steps:
       - name: Is Pages set to deploy from Actions?
         id: mode
@@ -53,6 +57,22 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: .
+  deploy:
+    needs: build
+    if: needs.build.outputs.on == 'yes'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.retry.outputs.page_url || steps.deployment.outputs.page_url }}
+    steps:
       - id: deployment
-        if: steps.mode.outputs.on == 'yes'
+        uses: actions/deploy-pages@v4
+        continue-on-error: true
+      - name: Wait, then try once more
+        if: steps.deployment.outcome == 'failure'
+        run: |
+          echo "::warning::The first deploy attempt failed (often the artifact isn't listed yet). Trying again in 20 seconds."
+          sleep 20
+      - id: retry
+        if: steps.deployment.outcome == 'failure'
         uses: actions/deploy-pages@v4
