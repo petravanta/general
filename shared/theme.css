@@ -1,7 +1,8 @@
 /* ===== Shared look: petravanta's apps =====
    "Nightbloom": plum-black nights, bone-white days, one bright accent per app.
-   Canonical copy of the tokens, type and components every app (and this hub) uses. Apps inline this block between
-   "Shared look" and "end shared look" (sync-shared refreshes it) and only override the --accent values after it.
+   The tokens, type and components every app (and this hub) uses. Apps load this file by URL, so a change here reaches
+   every app at once: <link rel="stylesheet" href="https://petravanta.github.io/general/shared/theme.css">
+   Keep changes backward compatible: never rename or remove a class or token here (see STANDARDS.md "Shared look").
    See STANDARDS.md "Shared look" and the live style guide at https://petravanta.github.io/general/look/ */
 :root{
   --bg:#f4f1f3; --surface:#fffcfd; --raised:#ffffff; --sunk:#ebe6ea; --line:#d9d1d8; --ink:#1d1621; --muted:#5e5566; --faint:#8c8393;

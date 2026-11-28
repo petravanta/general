@@ -58,7 +58,7 @@ When you add a standard, add its row here in the same change. Keep the *Check* c
 | theme-head | must | apps | `grep petravanta\.theme` | - | Head snippet applies the saved theme before first paint ([Light and dark themes](STANDARDS.md#light-and-dark-themes)) |
 | theme-switch | must | apps | `grep general/shared/theme-switch\.js` | - | Loads `theme-switch.js` by URL |
 | dark-tokens | must | all | `grep :root\[data-theme="dark"\]` | - | Color tokens with dark values, also under `:root[data-theme="dark"]` |
-| shared-look | must | apps !voicetrainer | `grep Shared look` | - | `shared/theme.css` inlined between the *Shared look* markers ([Shared look](STANDARDS.md#shared-look)) |
+| shared-look | must | apps !voicetrainer | `grep general/shared/theme\.css` | - | Loads `shared/theme.css` by URL, with no pasted copy ([Shared look](STANDARDS.md#shared-look)) |
 | phone-layout | must | all | `grep viewport-fit=cover` | - | Phone-first: `viewport-fit=cover`, safe-area insets, 16px gutters |
 | desktop-layout | must | all | `manual` | - | Checked at desktop width and at 390 px, light and dark ([Testing changes](STANDARDS.md#testing-changes)) |
 | test-data | must | all | `manual` | - | Tests use throwaway `zz-` data in a separate browser profile, never a person's real data |
@@ -69,7 +69,7 @@ When you add a standard, add its row here in the same change. Keep the *Check* c
 
 | ID | Level | Applies to | Check | Fix | What |
 | --- | --- | --- | --- | --- | --- |
-| shared-current | must | apps | `shared` | - | Pasted shared code (`google-token.js`, `drive-store.js`, `local-day.js`, `theme.css`) matches `general/shared/`; run `sync-shared` ([Pasted shared code](STANDARDS.md#pasted-shared-code)) |
+| shared-current | must | apps | `shared` | - | Pasted shared code (`google-token.js`, `drive-store.js`, `local-day.js`) matches `general/shared/`; run `sync-shared` ([Pasted shared code](STANDARDS.md#pasted-shared-code)) |
 
 ## Forms and dates
 

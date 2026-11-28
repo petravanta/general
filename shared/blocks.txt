@@ -4,4 +4,3 @@
 google-token.js | ===== Google sign-in | ===== end Google sign-in =====
 drive-store.js | ===== Drive store | ===== end Drive store =====
 local-day.js | ===== Local day | ===== end local day =====
-theme.css | ===== Shared look | ===== end shared look =====

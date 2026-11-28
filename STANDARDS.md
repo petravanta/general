@@ -452,7 +452,7 @@ To add a standard, add its section here and its row to `CHECKLIST.md` in the sam
 
 ## Pasted shared code
 
-Most shared code is loaded by URL (`hub-link.js`, `theme-switch.js`, `version-footer.js`, `app-sw.js`), so a change here reaches every app by itself. A few pieces can't be: [`shared/google-token.js`](shared/google-token.js), [`shared/drive-store.js`](shared/drive-store.js), [`shared/local-day.js`](shared/local-day.js) and [`shared/theme.css`](shared/theme.css) are pasted into each app between their marker comments, and [`shared/blocks.txt`](shared/blocks.txt) lists them with their markers. Pasted copies drift, so:
+Most shared code is loaded by URL (`theme.css`, `hub-link.js`, `theme-switch.js`, `version-footer.js`, `back-stack.js`, `app-sw.js`), so a change here reaches every app by itself. A few pieces can't be: [`shared/google-token.js`](shared/google-token.js), [`shared/drive-store.js`](shared/drive-store.js) and [`shared/local-day.js`](shared/local-day.js) are pasted into each app between their marker comments, and [`shared/blocks.txt`](shared/blocks.txt) lists them with their markers. Pasted copies drift, so:
 
 - **After any change to `shared/`,** add a line to [`CHANGELOG.md`](CHANGELOG.md) and run `sync-shared` to see which apps now have an old copy.
 - [`github/sync-shared.ps1`](github/sync-shared.ps1) (Windows) and [`github/sync-shared.sh`](github/sync-shared.sh) (Git Bash, macOS, Linux) look at every app clone under `F:\Dev\petravantaapps` and report each pasted block that differs from `shared/` here (ignoring its opening comment, indentation and blank lines). They never touch GitHub.
@@ -471,7 +471,21 @@ Most shared code is loaded by URL (`hub-link.js`, `theme-switch.js`, `version-fo
 
 ## Shared look
 
-Fitness Coach, Skating Mentor, Nutrition Helper, Special Trip Planner, Photo Timeline, Project Tracker, Study Buddy, Mind Palace, Dance Floor, Wardrobe and Mixmaster (and the hub) share one set of colors, fonts and components. The canonical copy is [`shared/theme.css`](shared/theme.css). Each app inlines it between the `Shared look` and `end shared look` comments and only overrides the `--accent`, `--accent-ink` and `--accent-soft` values after it:
+Fitness Coach, Skating Mentor, Nutrition Helper, Special Trip Planner, Photo Timeline, Project Tracker, Study Buddy, Mind Palace, Dance Floor, Wardrobe and Mixmaster (and the hub) share one set of colors, fonts and components. They all load one stylesheet, [`shared/theme.css`](shared/theme.css), by URL, so a change to it reaches every app the next time it opens, with no update to send out. Each app links it in `<head>` (after the theme head snippet and the fonts), then sets only its `--accent`, `--accent-ink` and `--accent-soft` values in its own `<style>` after it:
+
+```html
+<link rel="stylesheet" href="https://petravanta.github.io/general/shared/theme.css">
+<style>
+:root{--accent:#4f46c8;--accent-ink:#fff;--accent-soft:#e6e4fb}
+/* dark accent under the usual two dark selectors, then the app's own CSS */
+</style>
+```
+
+- **Offline:** `shared/app-sw.js` caches `theme.css` with the other shared files, so an installed app still opens styled without a connection.
+- **Backward compatible, always.** Because every app picks up a change at once, `theme.css` may add tokens, classes and refinements, but never renames or removes a class or token, and never changes what one means. A change that would break apps goes in a new file (`theme-v2.css`) that apps move to one at a time. Check every change on the style guide at [`look/`](look/) and on two or three apps before merging.
+- **An app's own CSS** goes in its own `<style>` (or `css/app.css`) after the link, using the tokens. Never copy `theme.css` into an app.
+
+Accents:
 
 | App | Light accent | Dark accent |
 | --- | --- | --- |
@@ -509,7 +523,7 @@ Plum-black nights, bone-white days, one bright accent per app. The live style gu
 - **Touch.** On a touch screen, buttons, tabs and fields grow to `--tap` and fields use 16 px text so phones don't zoom in.
 - **Motion** is short and only where something moves in or out (drawers, sheets, toasts); all of it turns off with *reduce motion*.
 
-When you change the shared look, update `shared/theme.css` here, then bring each app's inlined copy up to date with `sync-shared` (*Pasted shared code*).
+When you change the shared look, update `shared/theme.css` here and add a CHANGELOG line; apps need no change. Apps that still paste an old copy between the `Shared look` markers replace that block with the `<link>` above (moving any of their own lines inside the markers into their own `<style>`).
 
 ## Forms and dates
 
