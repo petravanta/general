@@ -1,6 +1,8 @@
-# Shared code that apps paste in between marker comments, rather than load by URL. github/sync-shared.sh reads this
-# list to check (and, with -Apply, refresh) every app's copy. See STANDARDS.md, "Pasted shared code".
+# Shared code that apps USED TO paste between marker comments. Apps now load these files by URL (STANDARDS.md,
+# "Shared code"); github/sync-shared.sh reads this list to report apps that still paste a copy, so it shows which
+# apps are left to move over (and -Apply can still refresh a pasted copy until then).
 # One line per file: file in shared/ | text on its opening marker line | text on its closing marker line
 google-token.js | ===== Google sign-in | ===== end Google sign-in =====
 drive-store.js | ===== Drive store | ===== end Drive store =====
 local-day.js | ===== Local day | ===== end local day =====
+theme.css | ===== Shared look | ===== end shared look =====

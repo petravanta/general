@@ -1,5 +1,7 @@
-# Deploys the app to GitHub Pages and stamps version.json with the commit and build time.
-# Copy to .github/workflows/pages.yml in each app. See STANDARDS.md, "Version and build info".
+# Deploys a site to GitHub Pages and stamps version.json with the commit and build time.
+# General deploys itself with it, and every app calls it from a short .github/workflows/pages.yml
+# (template: github/workflows/pages.yml), so a fix here reaches every app's next deploy. See STANDARDS.md,
+# "Version and build info". Keep it backward compatible: apps call it at @main.
 # Deploys only once Settings → Pages → Source is "GitHub Actions" (./github/apply-ruleset.sh switches it for repos
 # that have this file). Until then it checks, says so in the log and stops, and Pages keeps deploying from the branch.
 name: Deploy to Pages
@@ -7,6 +9,7 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  workflow_call:
 permissions:
   contents: read
   pages: write

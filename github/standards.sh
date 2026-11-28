@@ -126,6 +126,7 @@ gh_call() {  # gh_call READ|WRITE cmd...: pause, run, stop dead on a limit, retr
 src_paths=('*.html' '*.js' '*.css' '*.webmanifest' ':!vendor/' ':!node_modules/' ':!test/')
 in_mirror_grep() {  # repo, comma paths (or ""), regex
   local m="$dest/$1.git" re=${3//\{repo\}/$1} p=()
+  re=${re//\{or\}/|}  # {or} stands for | (CHECKLIST cells cannot hold |)
   if [ -n "$2" ]; then IFS=',' read -r -a p <<< "$2"; else p=("${src_paths[@]}"); fi
   git -C "$m" grep -qE -e "$re" HEAD -- "${p[@]}" 2>/dev/null
 }

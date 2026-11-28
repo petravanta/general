@@ -18,6 +18,8 @@ Add two things to the app's HTML:
 <script src="https://petravanta.github.io/general/shared/hub-link.js" defer></script>
 ```
 
+(An app that uses the one `app.js` tag from *Shared code* gets this script, and the others below, from it.)
+
 - The `<a>` is a normal link, so the back link still works where the script can't load (for example when the app runs as a claude.ai Artifact, which only allows scripts from a few CDNs).
 - [`shared/hub-link.js`](shared/hub-link.js) turns it into a small pill with a grid icon, styled with the app's own `--muted`, `--line`, `--ink` and `--accent` tokens, so it fits each app's colors and dark mode without extra CSS.
 - Once the script has loaded the app list from [`shared/apps.json`](shared/apps.json), the pill becomes a menu: **Home** (the hub) plus every app, with the current app marked, so people can jump straight from one app to another. If the list can't load, the pill stays a plain link to the hub.
@@ -27,12 +29,12 @@ Add two things to the app's HTML:
 ## Adding a new app
 
 1. Publish it on GitHub Pages under `petravanta.github.io/<repo>/`.
-2. Add the back link (above), the theme switch (below), the install files (*Installing on a phone*) the version footer with its deploy workflow (*Version and build info*) and, once it has any view that opens over another, the back stack (*Back button*), follow *Built-in knowledge* for its content, and *User data* for what people save.
+2. Load the shared look and scripts by URL (*Shared code*: the `theme.css` link and the one `app.js` tag), and add the back link (above), the theme switch (below), the install files (*Installing on a phone*) the version footer with its deploy workflow (*Version and build info*) and, once it has any view that opens over another, the back stack (*Back button*), follow *Built-in knowledge* for its content, and *User data* for what people save.
 3. Apply the *Protect main* ruleset and the repo settings for *Merging pull requests*: `.\github\apply-ruleset.ps1 <repo>` (or `./github/apply-ruleset.sh <repo>`).
 4. Add the MIT licence: copy [`LICENSE`](LICENSE) into the repo root as is (see *License*).
 5. Back it up: run `.\github\backup-repos.ps1 <repo>` (or `./github/backup-repos.sh <repo>`) once so its mirror exists from day one (*Backups*), and add its name to [`github/repos.txt`](github/repos.txt). After that the regular run picks it up by itself, because the script backs up every repo petravanta owns. Keep its working clone under `F:\Dev\petravantaapps` so `sync-all` checks it too (*Syncing every project*).
 6. Add a card for it to [`index.html`](index.html): copy an existing `<li class="app …">`, set its name, link, one-line description and icon, and add a `--app` / `--app-soft` accent pair (light and dark) in the `<style>` block. Also add the app to [`shared/apps.json`](shared/apps.json) (id, name, url and the same light and dark accents) so it shows in every app's menu (the hub cards and the menu sort themselves alphabetically by name, so place doesn't matter), and add the repo to the repo list in `github/apply-ruleset.ps1` and `github/apply-ruleset.sh`.
-7. Check it: `.\github\standards.ps1 <repo>` (or `./github/standards.sh <repo>`) should report no gaps (*Checking every project*), and end its `AGENTS.md` with `Checked against General as of <today's date>` (*Pasted shared code*).
+7. Check it: `.\github\standards.ps1 <repo>` (or `./github/standards.sh <repo>`) should report no gaps (*Checking every project*), and end its `AGENTS.md` with `Checked against General as of <today's date>` (*Notes for coding agents*).
 
 ## License
 
@@ -108,7 +110,7 @@ Storage on Google Drive is the standard for everything people save **except imag
 
 These are static pages with no server, so Google gives them no refresh token: a Drive sign-in lasts an hour, and getting a new one opens Google's window, which browsers only allow right after a tap. That can't be made silent, but every app does the following so it is rare and costs at most one tap:
 
-- **One sign-in for all the apps.** They share an origin and an OAuth client, so a token from one works in all. `shared/google-token.js` (paste it in between its marker comments, see *Pasted shared code*) keeps it under `localStorage` key `petravanta.google`, one per Google account, and tells open tabs when it changes. Reconnecting in one app reconnects every app on that browser, open tabs included.
+- **One sign-in for all the apps.** They share an origin and an OAuth client, so a token from one works in all. `shared/google-token.js` (loaded by URL, see *Shared code*) keeps it under `localStorage` key `petravanta.google`, one per Google account, and tells open tabs when it changes. Reconnecting in one app reconnects every app on that browser, open tabs included.
 - **The account as a hint.** After connecting, the app remembers the account's email and passes it as `login_hint`, so Google's window closes by itself rather than asking which account. A first connect suggests the account the other apps already use.
 - **Renew on any tap.** Once the token has under ten minutes left, the next tap anywhere renews it. Load Google's script when the page opens, not on the tap, or the browser may block the window.
 - **Open without waiting for Google.** The app opens on the browser's copy and keeps saving changes there; the first tap after the hour reconnects, merges Drive's copy in, then writes. Never put a "Reconnect" screen in front of data the browser already has.
@@ -249,7 +251,7 @@ Every app shows which build is running in a small line at the very bottom of the
 
 Add two things:
 
-1. **The script**, just before `</body>`, after `hub-link.js`:
+1. **The script**: `shared/app.js` loads it (*Shared code*). An app not yet on `app.js` adds it just before `</body>`, after `hub-link.js`:
 
    ```html
    <script src="https://petravanta.github.io/general/shared/version-footer.js" defer></script>
@@ -257,7 +259,7 @@ Add two things:
 
    In an app split into files it goes in `index.html`. [`shared/version-footer.js`](shared/version-footer.js) reads `version.json` next to the page and adds a `<footer>` at the end of `<body>`, styled with the app's `--muted`, `--line`, `--ink` and `--accent` tokens, so it follows light and dark themes and respects the phone's safe-area insets. An app with a fixed bottom bar adds an empty `<div data-version-footer></div>` where the line should go instead (for example after its scrolling content), so the bar doesn't cover it. The script also fills such a `<div>` when the app adds it later, so it can sit in a settings drawer; a full-screen app that shows the line only there (Mind Palace) adds `<meta name="version-footer" content="placed">` to `<head>` so no footer is added to the page. The info is also on `window.APP_BUILD` for the app's own error messages.
 
-2. **The deploy workflow**, so `version.json` gets stamped: copy [`github/workflows/pages.yml`](github/workflows/pages.yml) to `.github/workflows/pages.yml` in the app. It deploys the repo to GitHub Pages on every push to `main` and writes `commit`, `built` and `repo` into `version.json` on the way (keeping any `version` already there). Then switch the repo's Pages source to GitHub Actions: `./github/apply-ruleset.sh <repo>` (or `.ps1`) does that for every repo that has the workflow, or by hand **Settings → Pages → Source → GitHub Actions**. The workflow checks the source first, so landing it before the switch is harmless: it stops early and Pages keeps deploying from the branch.
+2. **The deploy workflow**, so `version.json` gets stamped: copy [`github/workflows/pages.yml`](github/workflows/pages.yml) to `.github/workflows/pages.yml` in the app, unchanged. It is a short stub that calls the shared workflow in this repo ([`.github/workflows/pages.yml`](.github/workflows/pages.yml)), so a fix to deploying reaches every app's next deploy. It deploys the repo to GitHub Pages on every push to `main` and writes `commit`, `built` and `repo` into `version.json` on the way (keeping any `version` already there). Then switch the repo's Pages source to GitHub Actions: `./github/apply-ruleset.sh <repo>` (or `.ps1`) does that for every repo that has the workflow, or by hand **Settings → Pages → Source → GitHub Actions**. The workflow checks the source first, so landing it before the switch is harmless: it stops early and Pages keeps deploying from the branch.
 
 Until both are in place the footer still shows, with the page's last-modified date and the word *unstamped*, so a missing stamp is visible rather than silent. VoiceTrainer, which has a build step, keeps its own build line instead: its deploy workflow stamps `version.json` and the page offers a reload when a newer build is out.
 
@@ -450,24 +452,28 @@ It keeps the same manners as *Syncing every project*: one repo at a time, a rand
 
 To add a standard, add its section here and its row to `CHECKLIST.md` in the same change. The *Check* column is a tiny language the scripts read: `file A,B` (any of these paths exists), `grep REGEX` (the app's own `.html`, `.js`, `.css` and manifest files match), `grep:PATHS REGEX` (these files or folders match), `nogrep REGEX` and `nogrep:PATHS REGEX` (the same files must *not* match), `shared` (every pasted shared block is current, as `sync-shared -Mirrors` reports), `hub-file` and `hub-grep:PATH` (the same, in general), `setting NAME` (a GitHub repo setting is true), `ruleset NAME`, `pages`, `mirror`, `clone` and `manual`. `{repo}` stands for the repo's name. A new automatic fix needs code in both scripts; a new check usually doesn't.
 
-## Pasted shared code
+## Shared code
 
-Most shared code is loaded by URL (`theme.css`, `hub-link.js`, `theme-switch.js`, `version-footer.js`, `back-stack.js`, `app-sw.js`), so a change here reaches every app by itself. A few pieces can't be: [`shared/google-token.js`](shared/google-token.js), [`shared/drive-store.js`](shared/drive-store.js) and [`shared/local-day.js`](shared/local-day.js) are pasted into each app between their marker comments, and [`shared/blocks.txt`](shared/blocks.txt) lists them with their markers. Pasted copies drift, so:
+<a id="pasted-shared-code"></a>Every piece of shared code is loaded **by URL** from this repo, never copied into an app, so a change here reaches every app the next time it opens, with no update to send out. All apps live on `petravanta.github.io`, so these are same-site files, and [`shared/app-sw.js`](shared/app-sw.js) caches each of them for offline use.
 
-- **After any change to `shared/`,** add a line to [`CHANGELOG.md`](CHANGELOG.md) and run `sync-shared` to see which apps now have an old copy.
-- [`github/sync-shared.ps1`](github/sync-shared.ps1) (Windows) and [`github/sync-shared.sh`](github/sync-shared.sh) (Git Bash, macOS, Linux) look at every app clone under `F:\Dev\petravantaapps` and report each pasted block that differs from `shared/` here (ignoring its opening comment, indentation and blank lines). They never touch GitHub.
+| What | How an app loads it |
+|---|---|
+| The look: [`theme.css`](shared/theme.css) | `<link rel="stylesheet" href="https://petravanta.github.io/general/shared/theme.css">` in `<head>` (*Shared look*) |
+| Page scripts: [`back-stack.js`](shared/back-stack.js), [`hub-link.js`](shared/hub-link.js), [`theme-switch.js`](shared/theme-switch.js), [`version-footer.js`](shared/version-footer.js), and registering `sw.js` | One tag just before `</body>`: `<script src="https://petravanta.github.io/general/shared/app.js" defer></script>` ([`shared/app.js`](shared/app.js); `data-skip="hub-link"` leaves one out, `data-no-sw` skips the worker) |
+| Libraries the app's code calls: [`google-token.js`](shared/google-token.js), [`drive-store.js`](shared/drive-store.js), [`local-day.js`](shared/local-day.js) | Plain `<script src="https://petravanta.github.io/general/shared/….js"></script>` tags (no `defer`), in that order, before the app's own script, and only the ones it uses |
+| Deploying: the Pages workflow | `.github/workflows/pages.yml` is a short stub that calls `petravanta/general/.github/workflows/pages.yml@main` (*Version and build info*) |
+| The service worker: [`app-sw.js`](shared/app-sw.js) | `importScripts` from the app's own `sw.js` (*Installing on a phone*) |
 
-  ```powershell
-  .\github\sync-shared.ps1               # report every app; changes nothing
-  .\github\sync-shared.ps1 wardrobe -Diff  # one app, showing the lines that differ
-  .\github\sync-shared.ps1 -Apply        # replace the old blocks in your clones' files
-  .\github\sync-shared.ps1 -Mirrors      # check what's on GitHub (the backup mirrors) instead of your clones
-  ```
+What stays in each app: the theme head snippet (it must run before the first paint), the app's accent colors, its `manifest.webmanifest`, `sw.js` and icons (browsers tie those to the app's own path), and its own code.
 
-  Each stale copy is reported as **old** (it matches an earlier version of the file here, so replacing it is safe) or **edited** (it matches no version: the app changed lines inside the markers). `-Apply` (`--apply`) replaces old copies in the working files only. It leaves edited ones alone until the app's own lines are moved after the closing marker (or into `shared/` here), unless `-Force` says to drop them; it skips a file with uncommitted changes; and it never commits or pushes. Review the change, test the app and open its pull request as usual. Telling old from edited needs this repo's history, so run it from a full clone of general, not a shallow one.
-- An app split into files (see *Splitting a large app* in [PATTERNS.md](PATTERNS.md)) keeps whole copies as `js/shared/<file>` instead of pasting them; sync-shared compares and replaces those whole.
-- An app never edits its pasted copy. Its own additions (extra CSS rules, say) go after the closing marker; a change every app needs goes into `shared/` here first, then out to every app.
-- The *shared-current* checklist row runs the same comparison against the backup mirrors, so `standards` reports stale copies too.
+**Because every app picks up a change at once:**
+
+- **Backward compatible, always.** Add things; never rename or remove a function, option, class or token, and never change what one means. A change that would break apps goes in a new file next to the old one (`drive-store-v2.js`, `theme-v2.css`) that apps move to one at a time, and the old file keeps working until none use it.
+- **Saved data needs extra care.** `drive-store.js` and `google-token.js` read and write people's data and sign-in. `drive-store.js` is version 1 of its interface and storage: keep its storage keys and file format readable by earlier versions, put anything else in `drive-store-v2.js`, and test with throwaway data (*Testing changes*) in at least two Drive apps before merging. As a safety net it keeps Drive's copy from just before each merge in the browser (`store.backup()` gives `{at, data}`), and Drive itself keeps about 30 days of the file's earlier versions.
+- **Check before merging:** the style guide at [`look/`](look/) for the look, and two or three apps (one with Drive) for scripts, at both widths and in both themes.
+- **Add a line to [`CHANGELOG.md`](CHANGELOG.md)** for every change to `shared/` or the workflow, naming anything an app has to do (usually nothing).
+
+**Moving an app over** (from the older pasted copies): delete each block between the `Shared look`, `Google sign-in`, `Drive store` and `Local day` markers (or the `js/shared/`, `css/shared/` copies in a split app), moving any of the app's own lines from inside a block into its own code; add the `<link>` and tags above; swap the separate `back-stack.js`, `hub-link.js`, `theme-switch.js`, `version-footer.js` tags and the `serviceWorker.register` snippet for the one `app.js` tag; and replace `.github/workflows/pages.yml` with the stub. [`github/sync-shared.ps1`](github/sync-shared.ps1) / [`.sh`](github/sync-shared.sh) still report every app clone under `F:\Dev\petravantaapps` that pastes a block listed in [`shared/blocks.txt`](shared/blocks.txt), so it shows which apps are left (run it from a full clone of general); its `-Apply` refresh of pasted copies is only for apps not yet moved.
 
 ## Shared look
 
@@ -523,13 +529,13 @@ Plum-black nights, bone-white days, one bright accent per app. The live style gu
 - **Touch.** On a touch screen, buttons, tabs and fields grow to `--tap` and fields use 16 px text so phones don't zoom in.
 - **Motion** is short and only where something moves in or out (drawers, sheets, toasts); all of it turns off with *reduce motion*.
 
-When you change the shared look, update `shared/theme.css` here and add a CHANGELOG line; apps need no change. Apps that still paste an old copy between the `Shared look` markers replace that block with the `<link>` above (moving any of their own lines inside the markers into their own `<style>`).
+When you change the shared look, update `shared/theme.css` here and add a CHANGELOG line; apps need no change (*Shared code*).
 
 ## Forms and dates
 
 Small things every app gets right the same way:
 
-- **Days are local.** A date someone picks or logs is a day on their own calendar. Get it with `LocalDay.today()` or `LocalDay.of(date)` from [`shared/local-day.js`](shared/local-day.js) (pasted in like the other shared code). Never use `toISOString().slice(0, 10)` for it: that is the UTC date, so in the evening, west of Greenwich, it is already tomorrow.
+- **Days are local.** A date someone picks or logs is a day on their own calendar. Get it with `LocalDay.today()` or `LocalDay.of(date)` from [`shared/local-day.js`](shared/local-day.js) (loaded by URL like the other shared code, *Shared code*). Never use `toISOString().slice(0, 10)` for it: that is the UTC date, so in the evening, west of Greenwich, it is already tomorrow.
 - **Date fields** use the browser's native date picker (`<input type="date">`) and save `YYYY-MM-DD`. A value saved earlier in a shorter form (just `2025-03`, say) is shown as it is and kept until the person picks a full date; the app never rewrites it on its own.
 - **Repeat values are suggested.** A free-text field whose values repeat (brands, sizes, tags, places) suggests the values already used, most used first (a `<datalist>` is enough), and still takes a new one.
 - **Every overlay can be closed three ways:** a visible **Close** button, the **Esc** key, and the phone's **Back** gesture. That goes for close-ups, sheets, drawers and dialogs; *Back button* below says how, with `shared/back-stack.js`.
@@ -565,6 +571,6 @@ function openItem(item) {
 - **Never trap people.** Push only when someone opens something (a tap or a key), never on page load, and never at the root view: no "press Back again to exit". Browsers skip entries that no one asked for anyway.
 - **No URL changes.** The script keeps the URL as it is. Views that already have their own URL (a `#/item/42` route) get Back from the browser and don't need it; use one way per view, not both.
 - **Reloads.** After a reload with views open, the page steps back to its root entry, since those views are gone.
-- [`shared/hub-link.js`](shared/hub-link.js) uses it for the *All apps* menu when `back-stack.js` is on the page, and [`shared/app-sw.js`](shared/app-sw.js) keeps it for offline use. It is loaded by URL rather than pasted in, so it isn't part of `sync-shared`.
+- [`shared/hub-link.js`](shared/hub-link.js) uses it for the *All apps* menu when `back-stack.js` is on the page, and [`shared/app-sw.js`](shared/app-sw.js) keeps it for offline use. It is loaded by URL (by `app.js` in apps that use it), so it isn't part of `sync-shared`.
 
 Check it on a phone (or at 390 px in the in-app browser): open each view, press Back, and the view closes while the app stays; press Back at the root, and the app is left.

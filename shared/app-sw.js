@@ -13,6 +13,10 @@
 var SCOPE = self.registration.scope;
 var CACHE = 'app-shell-' + new URL(SCOPE).pathname;
 var SHARED = [
+  'https://petravanta.github.io/general/shared/app.js',
+  'https://petravanta.github.io/general/shared/google-token.js',
+  'https://petravanta.github.io/general/shared/drive-store.js',
+  'https://petravanta.github.io/general/shared/local-day.js',
   'https://petravanta.github.io/general/shared/back-stack.js',
   'https://petravanta.github.io/general/shared/hub-link.js',
   'https://petravanta.github.io/general/shared/theme.css',

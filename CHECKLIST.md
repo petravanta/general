@@ -11,7 +11,7 @@ Optional patterns in [`PATTERNS.md`](PATTERNS.md) and the agents' working style 
 - **Check:** how the script tests it. `manual` means a person has to look.
 - **Fix:** what `-Apply` (`--apply`) does about a gap. `-` means it only reports it.
 
-When you add a standard, add its row here in the same change. Keep the *Check* cell free of `|` characters, because the scripts split rows on them.
+When you add a standard, add its row here in the same change. Keep the *Check* cell free of `|` characters, because the scripts split rows on them; in a `grep` pattern, write `{or}` where you mean `|` (either/or).
 
 ## Repo and licence
 
@@ -25,7 +25,7 @@ When you add a standard, add its row here in the same change. Keep the *Check* c
 | agents-link | must | apps | `grep:AGENTS.md general/blob/main/STANDARDS\.md` | - | `AGENTS.md` links back to STANDARDS.md |
 | claude-md | must | apps | `grep:CLAUDE.md @AGENTS\.md` | claude-md | One-line `CLAUDE.md` containing `@AGENTS.md` |
 | agents-checked | should | apps | `grep:AGENTS.md Checked against General as of [0-9]{4}-[0-9]{2}-[0-9]{2}` | - | `AGENTS.md` says when the app was last checked against these standards ([Notes for coding agents](STANDARDS.md#notes-for-coding-agents)) |
-| changelog | must | hub | `file CHANGELOG.md` | - | `CHANGELOG.md` with one dated line per standards or shared-code change ([Pasted shared code](STANDARDS.md#pasted-shared-code)) |
+| changelog | must | hub | `file CHANGELOG.md` | - | `CHANGELOG.md` with one dated line per standards or shared-code change ([Shared code](STANDARDS.md#shared-code)) |
 
 ## GitHub settings and safety copies
 
@@ -54,22 +54,24 @@ When you add a standard, add its row here in the same change. Keep the *Check* c
 | ID | Level | Applies to | Check | Fix | What |
 | --- | --- | --- | --- | --- | --- |
 | hub-link | must | apps | `grep data-hub-link` | - | **All apps** link in the header ([Back link to the hub](STANDARDS.md#back-link-to-the-hub)) |
-| hub-link-script | must | apps | `grep general/shared/hub-link\.js` | - | Loads `hub-link.js` by URL (app switcher menu) |
+| hub-link-script | must | apps | `grep general/shared/(hub-link{or}app)\.js` | - | Loads `hub-link.js` by URL (app switcher menu), directly or through `app.js` |
+| app-js | planned | apps !voicetrainer | `grep general/shared/app\.js` | - | One `app.js` tag loads the shared page scripts and registers `sw.js` ([Shared code](STANDARDS.md#shared-code)) |
+| shared-by-url | planned | apps | `nogrep ===== (Shared look{or}Google sign-in{or}Drive store{or}Local day)` | - | No pasted copies of shared code: `theme.css`, `google-token.js`, `drive-store.js` and `local-day.js` load by URL ([Shared code](STANDARDS.md#shared-code)) |
 | theme-head | must | apps | `grep petravanta\.theme` | - | Head snippet applies the saved theme before first paint ([Light and dark themes](STANDARDS.md#light-and-dark-themes)) |
-| theme-switch | must | apps | `grep general/shared/theme-switch\.js` | - | Loads `theme-switch.js` by URL |
+| theme-switch | must | apps | `grep general/shared/(theme-switch{or}app)\.js` | - | Loads `theme-switch.js` by URL, directly or through `app.js` |
 | dark-tokens | must | all | `grep :root\[data-theme="dark"\]` | - | Color tokens with dark values, also under `:root[data-theme="dark"]` |
-| shared-look | must | apps !voicetrainer | `grep general/shared/theme\.css` | - | Loads `shared/theme.css` by URL, with no pasted copy ([Shared look](STANDARDS.md#shared-look)) |
+| shared-look | must | apps !voicetrainer | `grep (general/shared/theme\.css{or}===== Shared look)` | - | The shared look: `shared/theme.css` by URL (or, until the app moves over, a pasted copy) ([Shared look](STANDARDS.md#shared-look)) |
 | phone-layout | must | all | `grep viewport-fit=cover` | - | Phone-first: `viewport-fit=cover`, safe-area insets, 16px gutters |
 | desktop-layout | must | all | `manual` | - | Checked at desktop width and at 390 px, light and dark ([Testing changes](STANDARDS.md#testing-changes)) |
 | test-data | must | all | `manual` | - | Tests use throwaway `zz-` data in a separate browser profile, never a person's real data |
-| version-footer | must | all !voicetrainer | `grep shared/version-footer\.js` | - | Loads `version-footer.js`: version, commit and build time at the bottom of the page ([Version and build info](STANDARDS.md#version-and-build-info)) |
+| version-footer | must | all !voicetrainer | `grep shared/(version-footer{or}app)\.js` | - | Loads `version-footer.js`: version, commit and build time at the bottom of the page ([Version and build info](STANDARDS.md#version-and-build-info)) |
 | version-stamp | must | all !voicetrainer | `file .github/workflows/pages.yml` | - | Pages workflow stamps `version.json` on deploy; Pages source set to GitHub Actions |
 
 ## Shared code
 
 | ID | Level | Applies to | Check | Fix | What |
 | --- | --- | --- | --- | --- | --- |
-| shared-current | must | apps | `shared` | - | Pasted shared code (`google-token.js`, `drive-store.js`, `local-day.js`) matches `general/shared/`; run `sync-shared` ([Pasted shared code](STANDARDS.md#pasted-shared-code)) |
+| shared-current | must | apps | `shared` | - | Any still-pasted shared code matches `general/shared/`; run `sync-shared` ([Shared code](STANDARDS.md#shared-code)) |
 
 ## Forms and dates
 
@@ -77,7 +79,7 @@ When you add a standard, add its row here in the same change. Keep the *Check* c
 | --- | --- | --- | --- | --- | --- |
 | local-day | should | apps | `nogrep toISOString\(\)\.slice\(0, ?10\)` | - | Days are local (`LocalDay` from `local-day.js`), never `toISOString().slice(0, 10)` ([Forms and dates](STANDARDS.md#forms-and-dates)) |
 | overlay-close | must | apps | `manual` | - | Every overlay closes with a visible Close button, Esc and the phone's Back gesture |
-| back-stack | planned | apps | `grep general/shared/back-stack\.js` | - | Loads `back-stack.js` by URL, so Back closes the view in front ([Back button](STANDARDS.md#back-button)); apps with no view over another can skip it |
+| back-stack | planned | apps | `grep general/shared/(back-stack{or}app)\.js` | - | Loads `back-stack.js` by URL, so Back closes the view in front ([Back button](STANDARDS.md#back-button)); apps with no view over another can skip it |
 | back-closes-front | planned | apps | `manual` | - | Back closes each dialog, sheet, drawer, menu, close-up and detail screen; Back at the root leaves the app; Close and Esc go through `layer.close()` |
 | date-fields | should | apps | `manual` | - | Native date picker saving `YYYY-MM-DD`; older partial dates kept until a full one is picked |
 | repeat-values | should | apps | `manual` | - | Free-text fields that repeat suggest values already used, most used first |
@@ -92,7 +94,7 @@ When you add a standard, add its row here in the same change. Keep the *Check* c
 | icons | must | all | `file icon-512.png,pwa/icon-512.png,icons/icon-512.png` | - | Icons made with `tools/make-icons.js` |
 | maskable-icon | should | all | `file icon-maskable-512.png,pwa/icon-maskable-512.png,icons/icon-maskable-512.png` | - | Maskable icon for Android |
 | service-worker | must | all | `file sw.js,pwa/sw.js` | - | `sw.js` (the shared `app-sw.js`, or an older own one) |
-| sw-register | must | all | `grep serviceWorker\.register` | - | Page registers the worker, on the real site only |
+| sw-register | must | all | `grep (serviceWorker\.register{or}general/shared/app\.js)` | - | Page registers the worker, on the real site only (`app.js` does it) |
 
 ## Built-in knowledge (apps with a `data/` folder)
 

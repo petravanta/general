@@ -1,6 +1,8 @@
 /* ===== Drive store: petravanta's apps =====
    Canonical copy: https://github.com/petravanta/general/blob/main/shared/drive-store.js (see STANDARDS.md, "Data lives in Google Drive").
-   Needs GoogleToken (shared/google-token.js) inlined above it.
+   Apps load it by URL (STANDARDS.md, "Shared code"), after google-token.js. This is version 1 of its interface and storage:
+   change it only in ways every app keeps working with, and keep reading what earlier versions saved. Anything else
+   goes in a new drive-store-v2.js that apps move to one at a time.
    Keeps an app's data in one JSON file in the user's Google Drive, at petravanta/<App name>/<file> (drive.file scope: the apps
    only see files they created). A file saved before folders existed is moved there once, on the first connect.
    The browser keeps a copy of the last data, so the app opens straight away even when the hour-long Google sign-in has run out,
@@ -113,6 +115,9 @@ function DriveStore(o){
     const hit=(await list(`${name} and ${qs(dir)} in parents`))[0]||(await list(name))[0];
     S.fileId=hit?hit.id:null; put('file',S.fileId); if(S.fileId) await tidy(S.fileId); return S.fileId;
   }
+  // Safety net: before this browser writes over Drive's copy with a merge, keep that copy here (backup()), so a bad
+  // merge can be undone. Drive also keeps about 30 days of the file's earlier versions (File → Manage versions).
+  const keep=remote=>{if(remote) put('backup',{at:new Date().toISOString(),data:remote})};
   async function read(){const id=await find(); return id?(await call(`/drive/v3/files/${id}?alt=media`)).json():null}
   async function write(data){
     const body=JSON.stringify({app:o.app,saved:new Date().toISOString(),...data}), up=id=>call(`/upload/drive/v3/files/${id}?uploadType=media`,{method:'PATCH',headers:{'Content-Type':'application/json'},body});
@@ -130,6 +135,7 @@ function DriveStore(o){
     if(!S.stale) return;
     const remote=await read(); S.stale=false;
     if(!remote) return;
+    keep(remote);
     const before=JSON.stringify(S.data); S.data=o.merge(remote,S.data); put('copy',S.data);
     if(JSON.stringify(S.data)!==before) try{o.onRemote&&o.onRemote(S.data)}catch(e){}
   }
@@ -154,7 +160,7 @@ function DriveStore(o){
     try{
       const remote=await read();
       let data=remote?o.merge(remote,o.empty()):o.empty();
-      if(pending) data=o.merge(pending,data);
+      if(pending){keep(remote); data=o.merge(pending,data)}
       S.data=data; S.stale=false; S.err=null; S.problem=null; S.last=new Date(); put('copy',data);
       if(!remote||pending){await write(data); put('pending',null)}
       return data;
@@ -173,7 +179,7 @@ function DriveStore(o){
   function save(data){S.data=data; put('copy',data); if(!put('pending',data)) {/* storage full or blocked: Drive still gets it */} clearTimeout(S.timer); S.timer=setTimeout(flush,1500); note()}
   function signOut(){
     GoogleToken.forget(S.email);
-    S.token=null; S.exp=0; S.data=null; S.stale=false; S.problem=null; S.email=''; ['known','file','folder','moved','pending','copy','email'].forEach(k=>put(k,null)); S.known=false; note();
+    S.token=null; S.exp=0; S.data=null; S.stale=false; S.problem=null; S.email=''; ['known','file','folder','moved','pending','copy','email','backup'].forEach(k=>put(k,null)); S.known=false; note();
   }
   // Tokens last an hour. Renew on a tap when it is close to running out or gone, then save anything waiting.
   document.addEventListener('click',e=>{
@@ -196,9 +202,10 @@ function DriveStore(o){
     if(waiting) return 'Saving to Google Drive…';
     return 'Saved to Google Drive'+(S.last?' · '+S.last.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'}):'');
   }
+  // backup(): {at, data}, Drive's copy from just before this browser last merged into it, or null
   // folder(): the id of petravanta/<App name>/, made if missing, for anything else the app saves to Drive (Google Docs, photos)
   // problem: null when all is well, else {kind, text, status, reason, message, retrying, retryAt, at} (STANDARDS.md, "When Google Drive says no")
-  return {load,save,flush,refresh,signIn,signOut,status,live,folder:home,explain,get problem(){return S.problem},
+  return {load,save,flush,refresh,signIn,signOut,status,live,folder:home,explain,backup:()=>get('backup'),get problem(){return S.problem},
     get data(){return S.data}, get known(){return S.known}, get configured(){return !!o.clientId}, get file(){return o.file},
     get needsTap(){return !!S.data&&!live()}};
 }
