@@ -158,7 +158,7 @@ function Mirror-Has([string]$r, [string]$paths) {
   return $false
 }
 function Mirror-Grep([string]$r, [string]$paths, [string]$re) {
-  $re = '(?m)' + $re.Replace('{repo}', $r)
+  $re = '(?m)' + $re.Replace('{repo}', $r).Replace('{or}', '|')  # {or} stands for | (CHECKLIST cells cannot hold |)
   if ($paths) {
     $files = @()
     foreach ($p in ($paths -split ',')) {

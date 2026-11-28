@@ -9,13 +9,11 @@ Ways of solving a problem that one app worked out and other apps can use when th
 ```
 index.html            the page: markup, the head snippets and the script tags
 css/app.css           the app's own styles
-css/shared/theme.css  the shared look, a whole copy (see below)
-js/shared/*.js        shared code, whole copies: google-token.js, drive-store.js, local-day.js
 js/*.js               the app's own code, in a few files by area
 ```
 
 - **No build step.** The files are loaded with plain `<link rel="stylesheet">` and `<script src="js/….js" defer>` tags (or `type="module"`), so what's in the repo is what's served, and GitHub Pages deploys it as before.
-- **Shared code comes in as whole files.** Instead of pasting a block between markers, the app keeps an unchanged copy of each shared file in `js/shared/` (and the theme in `css/shared/`). `sync-shared` compares those copies whole and `-Apply` replaces them (STANDARDS.md, *Pasted shared code*).
+- **Shared code is linked, not copied.** Like every app, a split app loads `theme.css`, `app.js` and the shared libraries by URL (STANDARDS.md, *Shared code*); it keeps no copies in `js/shared/` or `css/shared/`.
 - **Offline still works.** The app's `sw.js` lists the new files in `APP_SHELL`; the shared worker already fetches the app's own files network-first with the cache as fallback.
 - **The rest is unchanged.** The version footer script, the theme head snippet, the manifest and icons stay in `index.html` and the root as before.
 - **A build step stays allowed, as the exception.** VoiceTrainer's pattern (sources in `src/`, a `build.js` that writes one page, files in `pwa/`) suits an app that needs one, for example to inline large data. Prefer the plain split first.

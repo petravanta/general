@@ -7,7 +7,7 @@ Home for things shared across petravanta's personal growth apps.
 - **Standards:** [`STANDARDS.md`](STANDARDS.md) describes the conventions the apps follow and how to add a new app.
 - **Standards:** [`CHECKLIST.md`](CHECKLIST.md) itemizes them, and [`github/standards.ps1`](github/standards.ps1) / [`.sh`](github/standards.sh) check every repo against that list and can fix the simple gaps in bulk (see *Checking every project* in STANDARDS.md).
 - **Changes and patterns:** [`CHANGELOG.md`](CHANGELOG.md) has one dated line per standards or shared-code change, and [`PATTERNS.md`](PATTERNS.md) collects optional patterns apps can pick up (splitting a large app into files, on-device machine learning).
-- **Pasted shared code:** [`github/sync-shared.ps1`](github/sync-shared.ps1) / [`.sh`](github/sync-shared.sh) report which apps have an old copy of the shared code they paste in (see *Pasted shared code* in STANDARDS.md).
+- **Shared code:** apps load everything in [`shared/`](shared/) by URL; [`github/sync-shared.ps1`](github/sync-shared.ps1) / [`.sh`](github/sync-shared.sh) report apps that still paste an old copy (see *Shared code* in STANDARDS.md).
 - **Testing:** [`tools/screenshot.mjs`](tools/screenshot.mjs) takes headless Chrome screenshots at any size and theme (see *Testing changes* in STANDARDS.md).
 - **Backups:** [`github/backup-repos.ps1`](github/backup-repos.ps1) / [`.sh`](github/backup-repos.sh) keep a full local mirror of every petravanta repo (see *Backups* in STANDARDS.md).
 

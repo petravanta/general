@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Nightbloom style guide</title>
+<meta name="description" content="The shared look of petravanta's apps: tokens, type and components in light and dark, with every app's accent.">
+<meta name="theme-color" content="#fffcfd" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#16131b" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="../icons/icon.svg" type="image/svg+xml">
+<script>try{var t=localStorage.getItem('petravanta.theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../shared/theme.css">
+<style>
+/* The guide previews any app's accent; real apps set these three by hand after the shared block. */
+:root{--accent:#11897a;--accent-ink:#ffffff;--accent-soft:color-mix(in srgb,var(--accent) 14%,var(--surface))}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--accent:#3cc3ad;--accent-ink:#0d0b10}}
+:root[data-theme="dark"]{--accent:#3cc3ad;--accent-ink:#0d0b10}
+.topbar{padding-block:12px}
+.topbar .status{margin-left:auto}
+@media (max-width:560px){.topbar .status{display:none}.topbar [data-theme-switch]{margin-left:auto}}
+section{padding-block:28px 8px}
+section > h2{margin-bottom:6px}
+section > p.lead{color:var(--muted);max-width:62ch;margin-bottom:18px}
+.swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.sw{border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:var(--surface)}
+.sw i{display:block;height:54px;background:var(--c);border-bottom:1px solid var(--line)}
+.sw div{padding:8px 10px;font:500 12px/1.4 var(--f-mono)}
+.sw div span{display:block;color:var(--muted)}
+.type-row{display:grid;grid-template-columns:110px minmax(0,1fr);gap:12px;align-items:baseline;padding:10px 0;border-top:1px solid var(--line)}
+.type-row code{font:500 12px var(--f-mono);color:var(--muted)}
+.scale{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end}
+.scale div{background:color-mix(in srgb,var(--accent) 35%,transparent);border-radius:3px}
+.scale span{display:block;font:500 11px var(--f-mono);color:var(--muted);margin-top:4px;text-align:center}
+.grid2{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));gap:16px}
+.statuses{display:flex;flex-direction:column;gap:10px}
+.demo-header{display:flex;align-items:center;gap:12px;padding:10px 14px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+code.inline{font:500 12.5px var(--f-mono);background:var(--sunk);padding:1px 6px;border-radius:5px}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="topbar">
+      <a data-hub-link href="https://petravanta.github.io/general/">All apps</a>
+      <div class="brand">Nightbloom</div>
+      <span class="status" data-state="ok">Saved to Drive · 09:41</span>
+      <span data-theme-switch></span>
+    </div>
+    <nav class="tabs" role="tablist" aria-label="Sections">
+      <button role="tab" aria-selected="true" data-go="colors">Colors</button>
+      <button role="tab" aria-selected="false" data-go="type">Type</button>
+      <button role="tab" aria-selected="false" data-go="controls">Controls</button>
+      <button role="tab" aria-selected="false" data-go="status">Status</button>
+      <button role="tab" aria-selected="false" data-go="layers">Layers</button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section>
+    <h1>The shared look</h1>
+    <p class="lead" style="margin-top:12px">Plum-black nights, bone-white days, and one bright accent per app. Everything here is <code class="inline">shared/theme.css</code>, the block every app pastes in. Pick an app to see its accent on every component.</p>
+    <div class="chips" id="accents" role="group" aria-label="Preview an app's accent"></div>
+  </section>
+
+  <section id="colors">
+    <h2>Colors</h2>
+    <p class="lead">Neutrals carry a faint plum tint in both themes. Status colours are for status only; the accent is the one thing that changes per app.</p>
+    <div class="swatches" id="swatches"></div>
+  </section>
+
+  <section id="type">
+    <h2>Type</h2>
+    <p class="lead">Unbounded for headings, Instrument Sans for reading, JetBrains Mono for numbers, ids and machine talk.</p>
+    <div class="type-row"><code>h1 · 2xl</code><h1>Train in the dark</h1></div>
+    <div class="type-row"><code>h2 · xl</code><h2>Today's session</h2></div>
+    <div class="type-row"><code>h3 · sm caps</code><h3>Warm-up</h3></div>
+    <div class="type-row"><code>body · md</code><p>Four sets of eight, slow on the way down. Rest ninety seconds, then go again.</p></div>
+    <div class="type-row"><code>.small.muted</code><p class="small muted">Last done 3 days ago at the Eastside rink.</p></div>
+    <div class="type-row"><code>.mono</code><p class="mono">142.5 kg · 00:01:30 · a1b2c3d</p></div>
+    <h3 style="margin-top:22px">Spacing --s-1 … --s-7</h3>
+    <div class="scale" id="scale" style="margin-top:10px"></div>
+  </section>
+
+  <section id="controls">
+    <h2>Controls</h2>
+    <p class="lead">Pill buttons, chips for choices, fields with an accent ring on focus. On touch screens every target grows to 44 px.</p>
+    <div class="grid2">
+      <div class="panel stack">
+        <h3>Buttons</h3>
+        <div class="row"><button class="btn primary">Start session</button><button class="btn">Edit</button><button class="btn ghost">Later</button><button class="btn danger">Delete</button></div>
+        <div class="row"><button class="btn big primary">Log it</button><button class="btn sm">Undo</button><button class="btn" disabled>Disabled</button></div>
+        <div class="row"><button class="back">Back to all skills</button></div>
+      </div>
+      <div class="panel stack">
+        <h3>Chips and pills</h3>
+        <div class="chips"><button class="chip" aria-pressed="true">Gym</button><button class="chip" aria-pressed="false">Home</button><button class="chip" aria-pressed="false">Outdoors</button></div>
+        <div class="row"><span class="pill">New</span><span class="pill l1">Learning</span><span class="pill l2">Developing</span><span class="pill l3">Confident</span><span class="pill l4">Solid</span></div>
+        <div class="row"><span class="pill ok">Synced</span><span class="pill warn">Waiting</span><span class="pill bad">Needs you</span></div>
+      </div>
+      <div class="panel stack">
+        <h3>Fields</h3>
+        <div class="ctx" style="grid-template-columns:repeat(2,minmax(0,1fr))">
+          <label class="field">Exercise<input type="text" value="Romanian deadlift"></label>
+          <label class="field">Date<input type="date" value="2026-11-27"></label>
+          <label class="field">Skates<select><option>Quads</option><option>Inlines</option></select></label>
+          <label class="field">Sets<input type="number" value="4"></label>
+        </div>
+        <label class="row small"><input type="checkbox" checked> Remind me tomorrow</label>
+      </div>
+      <div class="panel stack">
+        <h3>Numbers</h3>
+        <div class="stats">
+          <div class="stat"><b>12</b><span>Sessions</span></div>
+          <div class="stat"><b>86%</b><span>Done</span></div>
+          <div class="stat"><b>4.2</b><span>Avg RPE</span></div>
+          <div class="stat"><b>31</b><span>Day streak</span></div>
+        </div>
+        <div class="meter"><i style="width:68%"></i></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="status">
+    <h2>Status</h2>
+    <p class="lead">One status line per app says whether its data is saved. Set <code class="inline">data-state</code> to <code class="inline">ok</code>, <code class="inline">saving</code>, <code class="inline">local</code> or the Drive store's <code class="inline">problem.kind</code>, and use <code class="inline">problem.text</code> as the words. Problems that wait for the person also get a banner.</p>
+    <div class="grid2">
+      <div class="panel statuses">
+        <span class="status" data-state="ok">Saved to Drive · 09:41</span>
+        <span class="status" data-state="saving">Saving…</span>
+        <span class="status" data-state="local">On this device only</span>
+        <span class="status" data-state="offline">Offline · saves when you're back</span>
+        <span class="status" data-state="busy">Google Drive is busy · trying again by itself (429 rateLimitExceeded)</span>
+        <span class="status" data-state="server">Google Drive had a problem · trying again in 1 min (503)</span>
+        <span class="status" data-state="full">Your Google Drive is full · free some space (403 storageQuotaExceeded)</span>
+        <span class="status" data-state="denied">Drive said no · sign in again to allow it (403 insufficientPermissions)</span>
+      </div>
+      <div class="stack">
+        <div class="banner"><p>New this week: a Back button that closes what's in front.</p><button class="btn sm">Got it</button></div>
+        <div class="banner ok"><p>Merged your phone's and this computer's copies.</p></div>
+        <div class="banner warn"><p>Google Drive is busy. Your changes are safe here and will be saved by themselves.</p></div>
+        <div class="banner bad"><p>Your Google Drive is full, so nothing new is being saved there.</p><button class="btn sm">Open Drive</button></div>
+        <div class="demo-header"><strong style="font-family:var(--f-display);font-size:15px">In a header</strong><span class="save-state" data-state="busy">Drive busy · retrying</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="layers">
+    <h2>Layers</h2>
+    <p class="lead">Drawers on desktop become bottom sheets on a phone. Every layer closes with its Close button, Esc and the Back gesture.</p>
+    <div class="row"><button class="btn primary" id="open-drawer">Open a drawer</button><button class="btn" id="show-toast">Show a toast</button></div>
+    <div class="panel" style="margin-top:16px">
+      <div class="entry"><div><b>Crossovers</b><div class="meta">Forward, both directions</div></div><span class="pill l3">Confident</span></div>
+      <div class="entry"><div><b>Mohawk turn</b><div class="meta">Needs a wide spot</div></div><span class="pill l1">Learning</span></div>
+      <div class="entry"><div><b>Toe stop</b><div class="meta">Not tried yet</div></div><span class="pill">New</span></div>
+    </div>
+    <div class="empty">Nothing logged yet. Your first session shows up here.</div>
+  </section>
+</main>
+
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title" hidden>
+  <button class="x" aria-label="Close" id="close-drawer">×</button>
+  <h2 id="drawer-title">Mohawk turn</h2>
+  <p class="muted">Open your hips, heel to heel, and step onto the new edge without looking down.</p>
+  <h3>Cues</h3>
+  <ul class="cues"><li>Lead with your shoulders</li><li>Free leg close to the skating foot</li><li>Eyes where you're going</li></ul>
+  <div class="checks"><label><input type="checkbox"> Left</label><label><input type="checkbox" checked> Right</label></div>
+  <div class="row"><button class="btn primary">Mark practiced</button><button class="btn ghost" id="close-drawer-2">Close</button></div>
+</aside>
+<div class="toast" id="toast" role="status" hidden>Saved. Nice work 🖤</div>
+
+<script>
+(function () {
+  var TOKENS = ['bg','surface','raised','sunk','line','ink','muted','faint','accent','accent-soft','ok','ok-soft','warn','warn-soft','danger','danger-soft'];
+  var sw = document.getElementById('swatches');
+  function paint() {
+    var cs = getComputedStyle(document.documentElement);
+    sw.innerHTML = TOKENS.map(function (t) {
+      return '<div class="sw" style="--c:var(--' + t + ')"><i></i><div>--' + t + '<span>' + cs.getPropertyValue('--' + t).trim() + '</span></div></div>';
+    }).join('');
+  }
+  var sc = document.getElementById('scale');
+  [4, 8, 12, 16, 24, 32, 48].forEach(function (n, i) {
+    sc.insertAdjacentHTML('beforeend', '<div><div style="width:' + n + 'px;height:' + n + 'px"></div><span>' + (i + 1) + '</span></div>');
+  });
+
+  // Accent preview, from the same list the app switcher uses
+  var chosen = null, apps = [];
+  function isDark() {
+    var t = document.documentElement.dataset.theme;
+    return t ? t === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+  function applyAccent() {
+    var s = document.documentElement.style;
+    if (!chosen) { s.removeProperty('--accent'); s.removeProperty('--accent-ink'); }
+    else { s.setProperty('--accent', isDark() ? chosen.accentDark : chosen.accent); s.setProperty('--accent-ink', isDark() ? '#0d0b10' : '#ffffff'); }
+    paint();
+  }
+  var box = document.getElementById('accents');
+  function chips() {
+    box.innerHTML = '<button class="chip" aria-pressed="' + !chosen + '" data-id="">Hub</button>' + apps.map(function (a) {
+      return '<button class="chip" aria-pressed="' + (chosen && chosen.id === a.id) + '" data-id="' + a.id + '"><span style="width:9px;height:9px;border-radius:50%;background:' + (isDark() ? a.accentDark : a.accent) + '"></span>' + a.name + '</button>';
+    }).join('');
+  }
+  box.addEventListener('click', function (e) {
+    var b = e.target.closest('.chip'); if (!b) return;
+    chosen = apps.filter(function (a) { return a.id === b.dataset.id; })[0] || null;
+    chips(); applyAccent();
+  });
+  fetch('../shared/apps.json').then(function (r) { return r.json(); }).then(function (list) {
+    apps = list.slice().sort(function (a, b) { return a.name.localeCompare(b.name); });
+    chips();
+  }).catch(function () {});
+  new MutationObserver(function () { chips(); applyAccent(); }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function () { chips(); applyAccent(); });
+  paint();
+
+  // Tabs jump to sections
+  var tabs = document.querySelectorAll('nav.tabs button');
+  [].forEach.call(tabs, function (b) {
+    b.addEventListener('click', function () {
+      [].forEach.call(tabs, function (x) { x.setAttribute('aria-selected', x === b); });
+      document.getElementById(b.dataset.go).scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  // Drawer: Close button, Esc, scrim, and Back (BackStack when it is on the page)
+  var drawer = document.getElementById('drawer'), scrim = document.getElementById('scrim'), layer = null;
+  function hide() { drawer.hidden = scrim.hidden = true; layer = null; }
+  function open() {
+    drawer.hidden = scrim.hidden = false;
+    if (window.BackStack) layer = BackStack.push(hide, { esc: true });
+  }
+  function close() { if (layer) layer.close(); else hide(); }
+  document.getElementById('open-drawer').onclick = open;
+  document.getElementById('close-drawer').onclick = close;
+  document.getElementById('close-drawer-2').onclick = close;
+  scrim.onclick = close;
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !drawer.hidden && !window.BackStack) close(); });
+  var toast = document.getElementById('toast'), tt;
+  document.getElementById('show-toast').onclick = function () {
+    toast.hidden = false; clearTimeout(tt); tt = setTimeout(function () { toast.hidden = true; }, 2200);
+  };
+})();
+</script>
+<script src="../shared/app.js" data-no-sw defer></script>
+</body>
+</html>
